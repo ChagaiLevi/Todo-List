@@ -1,11 +1,18 @@
 const taskInputC: HTMLInputElement = document.querySelector('.todo-input') as HTMLInputElement;
 const addTaskBtnC: HTMLButtonElement = document.querySelector('.todo-add-button') as HTMLButtonElement;
 const todoListC: HTMLUListElement = document.querySelector('.todo-list') as HTMLUListElement;
-let todoList = [
+
+let todoList: any = [];
+
+if (localStorage.getItem('todoList')) {
+  todoList = JSON.parse(localStorage.getItem('todoList') as string);
+}
+
+/*let todoList: any = [
   { text: 'Task 1', completed: false },
   { text: 'Task 2', completed: true },
   { text: 'Task 3', completed: false }
-];
+];*/
 addTaskBtnC.addEventListener('click', addTask);
 taskInputC.addEventListener('keyup', (event) => {
   event.key === 'Enter' ? addTask() : null;
@@ -23,6 +30,7 @@ function addTask(): void {
   convertTask();
   convertClass('todo-complete-button', comp);
   convertClass('todo-delete-button', rem);
+  localStorage.setItem('todoList', JSON.stringify(todoList));
 }
 
 function convertTask(): void {
@@ -73,6 +81,7 @@ function comp(event: any): void {
     todoList[number].completed = false;
     completed = false;
   }
+  localStorage.setItem('todoList', JSON.stringify(todoList));
 }
 function rem(event: any): void {
   let number = 0;
@@ -89,6 +98,7 @@ function rem(event: any): void {
   convertTask();
   convertClass('todo-complete-button', comp);
   convertClass('todo-delete-button', rem);
+  localStorage.setItem('todoList', JSON.stringify(todoList));
 
   console.log(todoList[number]);
   console.log(number);
