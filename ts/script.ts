@@ -6,7 +6,6 @@ let todoList = [
   { text: 'Task 2', completed: true },
   { text: 'Task 3', completed: false }
 ];
-
 addTaskBtnC.addEventListener('click', addTask);
 taskInputC.addEventListener('keyup', (event) => {
   event.key === 'Enter' ? addTask() : null;
@@ -33,7 +32,7 @@ function convertTask(): void {
       <li class="todo-item${index}">
         <span class="todo-item-text">${task.text}</span>
         <div class="todo-item-buttons">
-          <button class="todo-complete-button${index}">✔</button>
+          <button class="todo-complete-button${index} ${task.completed === true ? 'completed' : ''}">✔</button>
           <button class="todo-delete-button${index}">✖</button>
         </div>
       </li>
@@ -44,9 +43,14 @@ function convertTask(): void {
 convertTask();
 
 function convertClass(clas: string, func: any): void {
-  func;
   let classesTest: NodeListOf<HTMLLIElement> = document.querySelectorAll(`[class^="${clas}"]`) as NodeListOf<HTMLLIElement>;
-  const classes = Array.from(classesTest).map(el => el.className).filter(className => new RegExp(`^${clas}\\d+$`).test(className));
+  let classes;
+  if (clas === 'todo-complete-button') {
+    classes = Array.from(classesTest).map(el => el.className).filter(className => new RegExp(`^${`${clas}`}\\ d+\\s+${`${clas}`}\\ completedd+$`).test(className));
+  }
+  else {
+    classes = Array.from(classesTest).map(el => el.className).filter(className => new RegExp(`^${clas}\\d+$`).test(className));
+  }
 
   classes.forEach(className => {
     const cl: HTMLLIElement = document.querySelector(`.${className}`) as HTMLLIElement;
@@ -54,7 +58,7 @@ function convertClass(clas: string, func: any): void {
   });
 }
 
-let completed = false;
+
 function comp(event: any): void {
   let number = 0;
   let className: string = event.target.classList[0];
@@ -65,6 +69,9 @@ function comp(event: any): void {
       number = Number(className[i]);
     }
   }
+
+  let completed: boolean = todoList[number].completed;
+
   if (!completed) {
     completedC.classList.add('completed');
     todoList[number].completed = true;

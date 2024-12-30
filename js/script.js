@@ -29,7 +29,7 @@ function convertTask() {
       <li class="todo-item${index}">
         <span class="todo-item-text">${task.text}</span>
         <div class="todo-item-buttons">
-          <button class="todo-complete-button${index}">✔</button>
+          <button class="todo-complete-button${index} ${task.completed === true ? 'completed' : ''}">✔</button>
           <button class="todo-delete-button${index}">✖</button>
         </div>
       </li>
@@ -38,15 +38,19 @@ function convertTask() {
 }
 convertTask();
 function convertClass(clas, func) {
-    func;
     let classesTest = document.querySelectorAll(`[class^="${clas}"]`);
-    const classes = Array.from(classesTest).map(el => el.className).filter(className => new RegExp(`^${clas}\\d+$`).test(className));
+    let classes;
+    if (clas === 'todo-complete-button') {
+        classes = Array.from(classesTest).map(el => el.className).filter(className => new RegExp(`^${`${clas}`}\\ d+\\s+${`${clas}`}\\ completedd+$`).test(className));
+    }
+    else {
+        classes = Array.from(classesTest).map(el => el.className).filter(className => new RegExp(`^${clas}\\d+$`).test(className));
+    }
     classes.forEach(className => {
         const cl = document.querySelector(`.${className}`);
         cl.addEventListener('click', (event) => func(event));
     });
 }
-let completed = false;
 function comp(event) {
     let number = 0;
     let className = event.target.classList[0];
@@ -56,6 +60,7 @@ function comp(event) {
             number = Number(className[i]);
         }
     }
+    let completed = todoList[number].completed;
     if (!completed) {
         completedC.classList.add('completed');
         todoList[number].completed = true;
