@@ -54,19 +54,31 @@ function convertClass(clas: string, func: any): void {
   });
 }
 
-convertClass('todo-complete-button', comp);
-
 let completed = false;
 function comp(event: any): void {
-  if (!completed) {
-    const completedC: HTMLButtonElement = document.querySelector(`.${event.target.classList.value}`) as HTMLButtonElement;
-    completedC.classList.add('completed');
-  }
+  let number = 0;
+  let className: string = event.target.classList[0];
+  const completedC: HTMLButtonElement = document.querySelector(`.${className}`) as HTMLButtonElement;
 
+  for (let i = 0; i < className.length; i++) {
+    if (!isNaN(parseInt(className[i]))) {
+      number = Number(className[i]);
+    }
+  }
+  if (!completed) {
+    completedC.classList.add('completed');
+    todoList[number].completed = true;
+    completed = true;
+  }
+  else {
+    completedC.classList.remove('completed');
+    todoList[number].completed = false;
+    completed = false;
+  }
 }
 function rem(event: any): void {
   let number = 0;
-  let className: string = event.target.classList.value;
+  let className: string = event.target.classList[0];
   for (let i = 0; i < className.length; i++) {
     if (!isNaN(parseInt(className[i]))) {
       number = Number(className[i]);

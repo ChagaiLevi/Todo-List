@@ -46,17 +46,30 @@ function convertClass(clas, func) {
         cl.addEventListener('click', (event) => func(event));
     });
 }
-convertClass('todo-complete-button', comp);
 let completed = false;
 function comp(event) {
+    let number = 0;
+    let className = event.target.classList[0];
+    const completedC = document.querySelector(`.${className}`);
+    for (let i = 0; i < className.length; i++) {
+        if (!isNaN(parseInt(className[i]))) {
+            number = Number(className[i]);
+        }
+    }
     if (!completed) {
-        const completedC = document.querySelector(`.${event.target.classList.value}`);
         completedC.classList.add('completed');
+        todoList[number].completed = true;
+        completed = true;
+    }
+    else {
+        completedC.classList.remove('completed');
+        todoList[number].completed = false;
+        completed = false;
     }
 }
 function rem(event) {
     let number = 0;
-    let className = event.target.classList.value;
+    let className = event.target.classList[0];
     for (let i = 0; i < className.length; i++) {
         if (!isNaN(parseInt(className[i]))) {
             number = Number(className[i]);
