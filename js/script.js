@@ -3,14 +3,12 @@ const taskInputC = document.querySelector('.todo-input');
 const addTaskBtnC = document.querySelector('.todo-add-button');
 const todoListC = document.querySelector('.todo-list');
 let todoList = [];
+convertTask();
+convertClass('todo-complete-button', comp);
+convertClass('todo-delete-button', rem);
 if (localStorage.getItem('todoList')) {
     todoList = JSON.parse(localStorage.getItem('todoList'));
 }
-/*let todoList: any = [
-  { text: 'Task 1', completed: false },
-  { text: 'Task 2', completed: true },
-  { text: 'Task 3', completed: false }
-];*/
 addTaskBtnC.addEventListener('click', addTask);
 taskInputC.addEventListener('keyup', (event) => {
     event.key === 'Enter' ? addTask() : null;
@@ -41,7 +39,6 @@ function convertTask() {
     `;
     });
 }
-convertTask();
 function convertClass(clas, func) {
     let classes = document.querySelectorAll(`[class^="${clas}"]`);
     classes.forEach(className => {
@@ -85,12 +82,4 @@ function rem(event) {
     convertClass('todo-complete-button', comp);
     convertClass('todo-delete-button', rem);
     localStorage.setItem('todoList', JSON.stringify(todoList));
-    console.log(todoList[number]);
-    console.log(number);
-    console.log(todoList);
-    //todoList.splice(number, 1);
 }
-// const todoElements: any = convertClass('todo-item', null, true);
-// todoElements.forEach((el: HTMLLIElement) => {});
-convertClass('todo-complete-button', comp);
-convertClass('todo-delete-button', rem);
