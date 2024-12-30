@@ -16,6 +16,7 @@ function addTask() {
     if (text.trim() === '') {
         return;
     }
+    taskInputC.value = '';
     todoList.unshift({ text, completed: false });
     convertTask();
     convertClass('todo-complete-button', comp);
@@ -46,8 +47,12 @@ function convertClass(clas, func) {
     });
 }
 convertClass('todo-complete-button', comp);
+let completed = false;
 function comp(event) {
-    event;
+    if (!completed) {
+        const completedC = document.querySelector(`.${event.target.classList.value}`);
+        completedC.classList.add('completed');
+    }
 }
 function rem(event) {
     let number = 0;
@@ -59,8 +64,9 @@ function rem(event) {
     }
     /*const element: HTMLLIElement = document.querySelector(`.todo-item${number}`) as HTMLLIElement;
     element.remove();*/
-    todoList.splice(number, number + 1);
+    number === 0 ? todoList.splice(0, 1) : todoList.splice(number, number);
     convertTask();
+    convertClass('todo-delete-button', rem);
     console.log(todoList[number]);
     console.log(number);
     console.log(todoList);

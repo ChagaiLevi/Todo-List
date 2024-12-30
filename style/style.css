@@ -94,3 +94,7 @@ body {
 [class^="todo-delete-button"]:hover {
   color: red;
 }
+
+.completed {
+  color: green;
+}

@@ -9,8 +9,7 @@ let todoList = [
 
 addTaskBtnC.addEventListener('click', addTask);
 taskInputC.addEventListener('keyup', (event) => {
-  event.key === 'Enter' ? addTask() : null
-
+  event.key === 'Enter' ? addTask() : null;
 });
 
 function addTask(): void {
@@ -20,6 +19,7 @@ function addTask(): void {
     return;
   }
 
+  taskInputC.value = '';
   todoList.unshift({ text, completed: false });
   convertTask();
   convertClass('todo-complete-button', comp);
@@ -55,8 +55,14 @@ function convertClass(clas: string, func: any): void {
 }
 
 convertClass('todo-complete-button', comp);
+
+let completed = false;
 function comp(event: any): void {
-  event;
+  if (!completed) {
+    const completedC: HTMLButtonElement = document.querySelector(`.${event.target.classList.value}`) as HTMLButtonElement;
+    completedC.classList.add('completed');
+  }
+
 }
 function rem(event: any): void {
   let number = 0;
@@ -68,9 +74,10 @@ function rem(event: any): void {
   }
   /*const element: HTMLLIElement = document.querySelector(`.todo-item${number}`) as HTMLLIElement;
   element.remove();*/
-  todoList.splice(number, number + 1);
+  number === 0 ? todoList.splice(0, 1) : todoList.splice(number, number);
 
   convertTask();
+  convertClass('todo-delete-button', rem);
 
   console.log(todoList[number]);
   console.log(number);
