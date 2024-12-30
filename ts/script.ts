@@ -43,18 +43,9 @@ function convertTask(): void {
 convertTask();
 
 function convertClass(clas: string, func: any): void {
-  let classesTest: NodeListOf<HTMLLIElement> = document.querySelectorAll(`[class^="${clas}"]`) as NodeListOf<HTMLLIElement>;
-  let classes;
-  if (clas === 'todo-complete-button') {
-    classes = Array.from(classesTest).map(el => el.className).filter(className => new RegExp(`^${`${clas}`}\\ d+\\s+${`${clas}`}\\ completedd+$`).test(className));
-  }
-  else {
-    classes = Array.from(classesTest).map(el => el.className).filter(className => new RegExp(`^${clas}\\d+$`).test(className));
-  }
-
+  let classes: NodeListOf<HTMLLIElement> = document.querySelectorAll(`[class^="${clas}"]`) as NodeListOf<HTMLLIElement>;
   classes.forEach(className => {
-    const cl: HTMLLIElement = document.querySelector(`.${className}`) as HTMLLIElement;
-    cl.addEventListener('click', (event: Event) => func(event));
+    className.addEventListener('click', (event: Event) => func(event));
   });
 }
 
@@ -96,6 +87,7 @@ function rem(event: any): void {
   number === 0 ? todoList.splice(0, 1) : todoList.splice(number, number);
 
   convertTask();
+  convertClass('todo-complete-button', comp);
   convertClass('todo-delete-button', rem);
 
   console.log(todoList[number]);
