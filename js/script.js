@@ -9,9 +9,7 @@ convertTask();
 addEventListenersToButtons('todo-complete-button', markAsCompleted);
 addEventListenersToButtons('todo-delete-button', removeTask);
 // Get the todoList from the localStorage:
-if (localStorage.getItem('todoList')) {
-    todoList = JSON.parse(localStorage.getItem('todoList'));
-}
+localStorage.getItem('todoList') ? todoList = JSON.parse(localStorage.getItem('todoList')) : null;
 // Add event listeners:
 addTaskButton.addEventListener('click', addTask);
 newTaskInput.addEventListener('keyup', (event) => {
@@ -27,13 +25,13 @@ function addTask() {
     }
     // Add the task to the todoList:
     newTaskInput.value = '';
-    todoList.unshift({ text, completed: false });
+    todoList.push({ text, completed: false });
     // Convert the task and update the class names:
     convertTask();
     addEventListenersToButtons('todo-complete-button', markAsCompleted);
     addEventListenersToButtons('todo-delete-button', removeTask);
     // Save the todoList to the localStorage:
-    localStorage.setItem('todoList', JSON.stringify(todoList));
+    localStorage.getItem('todoList') ? localStorage.setItem('todoList', JSON.stringify(todoList)) : null;
 }
 function convertTask() {
     // Clear the todoListClass:
@@ -62,14 +60,9 @@ function addEventListenersToButtons(clas, func) {
 function markAsCompleted(event) {
     // fing the class name from the event:
     let className = event.target.classList[0];
-    // find the index of the class name in the todoList array:
-    let number = 0;
     const completedC = document.querySelector(`.${className}`);
-    for (let i = 0; i < className.length; i++) {
-        if (!isNaN(parseInt(className[i]))) {
-            number = Number(className[i]);
-        }
-    }
+    const match = className.match(/\d+/);
+    const number = parseInt(match[0], 10);
     let completed = todoList[number].completed;
     // if the task is not completed, add the completed class to the button and set the completed property to true:
     if (!completed) {
@@ -84,7 +77,7 @@ function markAsCompleted(event) {
         completed = false;
     }
     // save the todoList to the localStorage:
-    localStorage.setItem('todoList', JSON.stringify(todoList));
+    localStorage.getItem('todoList') ? localStorage.setItem('todoList', JSON.stringify(todoList)) : null;
 }
 function removeTask(event) {
     // find the class name from the event:
@@ -105,7 +98,6 @@ function removeTask(event) {
     addEventListenersToButtons('todo-complete-button', markAsCompleted);
     addEventListenersToButtons('todo-delete-button', removeTask);
     // save the todoList to the localStorage:
-    localStorage.setItem('todoList', JSON.stringify(todoList));
+    localStorage.getItem('todoList') ? localStorage.setItem('todoList', JSON.stringify(todoList)) : null;
 }
-// The End
 //# sourceMappingURL=script.js.map
