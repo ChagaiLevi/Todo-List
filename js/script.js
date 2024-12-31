@@ -1,46 +1,46 @@
 "use strict";
 // All the classes:
-const taskInputC = document.querySelector('.todo-input');
-const addTaskBtnC = document.querySelector('.todo-add-button');
-const todoListC = document.querySelector('.todo-list');
+const newTaskInput = document.querySelector('.todo-input');
+const addTaskButton = document.querySelector('.todo-add-button');
+const todoListContainer = document.querySelector('.todo-list');
 let todoList = [];
 // Function to convert the class name based on the index:
 convertTask();
-convertClass('todo-complete-button', comp);
-convertClass('todo-delete-button', rem);
+addEventListenersToButtons('todo-complete-button', markAsCompleted);
+addEventListenersToButtons('todo-delete-button', removeTask);
 // Get the todoList from the localStorage:
 if (localStorage.getItem('todoList')) {
     todoList = JSON.parse(localStorage.getItem('todoList'));
 }
 // Add event listeners:
-addTaskBtnC.addEventListener('click', addTask);
-taskInputC.addEventListener('keyup', (event) => {
+addTaskButton.addEventListener('click', addTask);
+newTaskInput.addEventListener('keyup', (event) => {
     event.key === 'Enter' ? addTask() : null;
 });
 // Functions:
 function addTask() {
     // Get the value of the input:
-    const text = taskInputC.value;
+    const text = newTaskInput.value;
     // Check if the input is empty:
     if (text.trim() === '') {
         return;
     }
     // Add the task to the todoList:
-    taskInputC.value = '';
+    newTaskInput.value = '';
     todoList.unshift({ text, completed: false });
     // Convert the task and update the class names:
     convertTask();
-    convertClass('todo-complete-button', comp);
-    convertClass('todo-delete-button', rem);
+    addEventListenersToButtons('todo-complete-button', markAsCompleted);
+    addEventListenersToButtons('todo-delete-button', removeTask);
     // Save the todoList to the localStorage:
     localStorage.setItem('todoList', JSON.stringify(todoList));
 }
 function convertTask() {
     // Clear the todoListClass:
-    todoListC.innerHTML = '';
+    todoListContainer.innerHTML = '';
     // Convert the todoList array to the HTML:
     todoList.forEach((task, index) => {
-        todoListC.innerHTML += `
+        todoListContainer.innerHTML += `
       <li class="todo-item${index}">
         <span class="todo-item-text">${task.text}</span>
         <div class="todo-item-buttons">
@@ -51,7 +51,7 @@ function convertTask() {
     `;
     });
 }
-function convertClass(clas, func) {
+function addEventListenersToButtons(clas, func) {
     // Get all the classes that start with the given class name:
     let classes = document.querySelectorAll(`[class^="${clas}"]`);
     // Add an event listener to each class
@@ -59,7 +59,7 @@ function convertClass(clas, func) {
         className.addEventListener('click', (event) => func(event));
     });
 }
-function comp(event) {
+function markAsCompleted(event) {
     // fing the class name from the event:
     let className = event.target.classList[0];
     // find the index of the class name in the todoList array:
@@ -86,7 +86,7 @@ function comp(event) {
     // save the todoList to the localStorage:
     localStorage.setItem('todoList', JSON.stringify(todoList));
 }
-function rem(event) {
+function removeTask(event) {
     // find the class name from the event:
     let className = event.target.classList[0];
     // find the index of the class name in the todoList array:
@@ -102,8 +102,8 @@ function rem(event) {
     number === 0 ? todoList.splice(0, 1) : todoList.splice(number, number);
     // convert the task and update the class names:
     convertTask();
-    convertClass('todo-complete-button', comp);
-    convertClass('todo-delete-button', rem);
+    addEventListenersToButtons('todo-complete-button', markAsCompleted);
+    addEventListenersToButtons('todo-delete-button', removeTask);
     // save the todoList to the localStorage:
     localStorage.setItem('todoList', JSON.stringify(todoList));
 }

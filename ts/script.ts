@@ -1,7 +1,7 @@
 // All the classes:
-const taskInputC: HTMLInputElement = document.querySelector('.todo-input') as HTMLInputElement;
-const addTaskBtnC: HTMLButtonElement = document.querySelector('.todo-add-button') as HTMLButtonElement;
-const todoListC: HTMLUListElement = document.querySelector('.todo-list') as HTMLUListElement;
+const newTaskInput: HTMLInputElement = document.querySelector('.todo-input') as HTMLInputElement;
+const addTaskButton: HTMLButtonElement = document.querySelector('.todo-add-button') as HTMLButtonElement;
+const todoListContainer: HTMLUListElement = document.querySelector('.todo-list') as HTMLUListElement;
 
 // The types for the todoList array:
 type Item = { text: string, completed: boolean };
@@ -11,8 +11,8 @@ let todoList: todoList = [];
 
 // Function to convert the class name based on the index:
 convertTask();
-convertClass('todo-complete-button', comp);
-convertClass('todo-delete-button', rem);
+addEventListenersToButtons('todo-complete-button', markAsCompleted);
+addEventListenersToButtons('todo-delete-button', removeTask);
 
 // Get the todoList from the localStorage:
 if (localStorage.getItem('todoList')) {
@@ -20,8 +20,8 @@ if (localStorage.getItem('todoList')) {
 }
 
 // Add event listeners:
-addTaskBtnC.addEventListener('click', addTask);
-taskInputC.addEventListener('keyup', (event) => {
+addTaskButton.addEventListener('click', addTask);
+newTaskInput.addEventListener('keyup', (event) => {
   event.key === 'Enter' ? addTask() : null;
 });
 
@@ -29,7 +29,7 @@ taskInputC.addEventListener('keyup', (event) => {
 function addTask(): void {
   // Get the value of the input:
 
-  const text: string = taskInputC.value;
+  const text: string = newTaskInput.value;
 
   // Check if the input is empty:
   if (text.trim() === '') {
@@ -37,24 +37,24 @@ function addTask(): void {
   }
 
   // Add the task to the todoList:
-  taskInputC.value = '';
+  newTaskInput.value = '';
   todoList.unshift({ text, completed: false });
 
   // Convert the task and update the class names:
   convertTask();
-  convertClass('todo-complete-button', comp);
-  convertClass('todo-delete-button', rem);
+  addEventListenersToButtons('todo-complete-button', markAsCompleted);
+  addEventListenersToButtons('todo-delete-button', removeTask);
   // Save the todoList to the localStorage:
   localStorage.setItem('todoList', JSON.stringify(todoList));
 }
 
 function convertTask(): void {
   // Clear the todoListClass:
-  todoListC.innerHTML = '';
+  todoListContainer.innerHTML = '';
 
   // Convert the todoList array to the HTML:
   todoList.forEach((task: Item, index: number) => {
-    todoListC.innerHTML += `
+    todoListContainer.innerHTML += `
       <li class="todo-item${index}">
         <span class="todo-item-text">${task.text}</span>
         <div class="todo-item-buttons">
@@ -66,7 +66,7 @@ function convertTask(): void {
   });
 }
 
-function convertClass(clas: string, func: any): void {
+function addEventListenersToButtons(clas: string, func: any): void {
   // Get all the classes that start with the given class name:
   let classes: NodeListOf<HTMLLIElement> = document.querySelectorAll(`[class^="${clas}"]`) as NodeListOf<HTMLLIElement>;
 
@@ -77,7 +77,7 @@ function convertClass(clas: string, func: any): void {
 }
 
 
-function comp(event: any): void {
+function markAsCompleted(event: any): void {
   // fing the class name from the event:
   let className: string = event.target.classList[0];
   // find the index of the class name in the todoList array:
@@ -108,7 +108,7 @@ function comp(event: any): void {
   // save the todoList to the localStorage:
   localStorage.setItem('todoList', JSON.stringify(todoList));
 }
-function rem(event: any): void {
+function removeTask(event: any): void {
   // find the class name from the event:
   let className: string = event.target.classList[0];
   // find the index of the class name in the todoList array:
@@ -127,8 +127,8 @@ function rem(event: any): void {
 
   // convert the task and update the class names:
   convertTask();
-  convertClass('todo-complete-button', comp);
-  convertClass('todo-delete-button', rem);
+  addEventListenersToButtons('todo-complete-button', markAsCompleted);
+  addEventListenersToButtons('todo-delete-button', removeTask);
 
   // save the todoList to the localStorage:
   localStorage.setItem('todoList', JSON.stringify(todoList));
