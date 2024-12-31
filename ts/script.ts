@@ -133,3 +133,5 @@ function rem(event: any): void {
   // save the todoList to the localStorage:
   localStorage.setItem('todoList', JSON.stringify(todoList));
 }
+
+// The End

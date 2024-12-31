@@ -107,4 +107,5 @@ function rem(event) {
     // save the todoList to the localStorage:
     localStorage.setItem('todoList', JSON.stringify(todoList));
 }
+// The End
 //# sourceMappingURL=script.js.map
