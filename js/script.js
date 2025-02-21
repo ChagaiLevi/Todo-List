@@ -1,103 +1,127 @@
 "use strict";
-// All the classes:
+// Select HTML elements
 const newTaskInput = document.querySelector('.todo-input');
 const addTaskButton = document.querySelector('.todo-add-button');
 const todoListContainer = document.querySelector('.todo-list');
+// Initialize the task list
 let todoList = [];
-// Function to convert the class name based on the index:
+// Load tasks from local storage if available
+localStorage.getItem('todoList') ? todoList = JSON.parse(localStorage.getItem('todoList')) : null;
+// Render existing tasks and set event listeners
 convertTask();
 addEventListenersToButtons('todo-complete-button', markAsCompleted);
 addEventListenersToButtons('todo-delete-button', removeTask);
-// Get the todoList from the localStorage:
-localStorage.getItem('todoList') ? todoList = JSON.parse(localStorage.getItem('todoList')) : null;
-// Add event listeners:
+// Add event listeners for adding tasks
 addTaskButton.addEventListener('click', addTask);
 newTaskInput.addEventListener('keyup', (event) => {
     event.key === 'Enter' ? addTask() : null;
 });
-// Functions:
+// Add a new task to the list
 function addTask() {
-    // Get the value of the input:
     const text = newTaskInput.value;
-    // Check if the input is empty:
+    // Prevent adding empty tasks
     if (text.trim() === '') {
         return;
     }
-    // Add the task to the todoList:
     newTaskInput.value = '';
     todoList.push({ text, completed: false });
-    // Convert the task and update the class names:
+    // Update the task list and event listeners
     convertTask();
     addEventListenersToButtons('todo-complete-button', markAsCompleted);
     addEventListenersToButtons('todo-delete-button', removeTask);
-    // Save the todoList to the localStorage:
+    // Save updated task list to local storage
     localStorage.getItem('todoList') ? localStorage.setItem('todoList', JSON.stringify(todoList)) : null;
 }
+// Render tasks in the list
 function convertTask() {
-    // Clear the todoListClass:
     todoListContainer.innerHTML = '';
-    // Convert the todoList array to the HTML:
     todoList.forEach((task, index) => {
-        todoListContainer.innerHTML += `
-      <li class="todo-item${index}">
+        todoListContainer.innerHTML +=
+            `<li class="todo-item${index}">
         <span class="todo-item-text">${task.text}</span>
         <div class="todo-item-buttons">
+          <button class="todo-edit-button${index}">✎</button>
           <button class="todo-complete-button${index} ${task.completed === true ? 'completed' : ''}">✔</button>
           <button class="todo-delete-button${index}">✖</button>
         </div>
-      </li>
-    `;
+      </li>`;
     });
 }
+// Add event listeners to dynamically created buttons
 function addEventListenersToButtons(clas, func) {
-    // Get all the classes that start with the given class name:
     let classes = document.querySelectorAll(`[class^="${clas}"]`);
-    // Add an event listener to each class
     classes.forEach(className => {
         className.addEventListener('click', (event) => func(event));
     });
 }
+// Mark a task as completed or uncompleted
 function markAsCompleted(event) {
-    // fing the class name from the event:
     let className = event.target.classList[0];
     const completedC = document.querySelector(`.${className}`);
     const match = className.match(/\d+/);
     const number = parseInt(match[0], 10);
     let completed = todoList[number].completed;
-    // if the task is not completed, add the completed class to the button and set the completed property to true:
     if (!completed) {
         completedC.classList.add('completed');
         todoList[number].completed = true;
         completed = true;
     }
-    // if the task is completed, remove the completed class from the button and set the completed property to false:
     else {
         completedC.classList.remove('completed');
         todoList[number].completed = false;
         completed = false;
     }
-    // save the todoList to the localStorage:
+    // Update local storage
     localStorage.getItem('todoList') ? localStorage.setItem('todoList', JSON.stringify(todoList)) : null;
 }
+// Remove a task from the list
 function removeTask(event) {
-    // find the class name from the event:
     let className = event.target.classList[0];
-    // find the index of the class name in the todoList array:
     let number = 0;
+    // Extract the index from the class name
     for (let i = 0; i < className.length; i++) {
         if (!isNaN(parseInt(className[i]))) {
             number = Number(className[i]);
         }
     }
-    // remove the task from the todoList array:
-    // if the number is 0, remove the first element from the array:
-    // if the number is not 0, remove the element at the index of the number:
+    // Remove the task from the array
     number === 0 ? todoList.splice(0, 1) : todoList.splice(number, number);
-    // convert the task and update the class names:
+    // Update the task list and event listeners
     convertTask();
     addEventListenersToButtons('todo-complete-button', markAsCompleted);
     addEventListenersToButtons('todo-delete-button', removeTask);
-    // save the todoList to the localStorage:
+    // Save updated task list to local storage
     localStorage.getItem('todoList') ? localStorage.setItem('todoList', JSON.stringify(todoList)) : null;
 }
+let classes = document.querySelectorAll(`[class^="todo-edit-button"]`);
+let textclasses = document.querySelectorAll(`[class^="todo-item-text"]`);
+classes.forEach((className, index) => {
+    className.addEventListener('click', (event) => {
+        console.log(event);
+        className.addEventListener("click", () => {
+            const input = document.createElement("input");
+            input.type = "text";
+            input.value = textclasses[index].textContent || "";
+            input.className = "edit-input";
+            textclasses[index].replaceWith(input);
+            input.focus();
+            function saveAndReplace() {
+                if (document.body.contains(input)) { // בדיקה אם ה-input עדיין בדף
+                    if (!input.parentNode)
+                        return; // אם האלמנט כבר הוסר, לא לעשות
+                    textclasses[index].textContent = input.value;
+                    input.replaceWith(textclasses[index]);
+                }
+            }
+            input.addEventListener("blur", () => {
+                saveAndReplace();
+            });
+            input.addEventListener("keypress", (event) => {
+                if (event.key === "Enter") {
+                    saveAndReplace();
+                }
+            });
+        });
+    });
+});
 //# sourceMappingURL=script.js.map

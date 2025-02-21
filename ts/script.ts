@@ -2,7 +2,6 @@
 const newTaskInput: HTMLInputElement = document.querySelector('.todo-input') as HTMLInputElement;
 const addTaskButton: HTMLButtonElement = document.querySelector('.todo-add-button') as HTMLButtonElement;
 const todoListContainer: HTMLUListElement = document.querySelector('.todo-list') as HTMLUListElement;
-
 // Define the structure of a task item
 type Item = { text: string, completed: boolean };
 type todoList = Item[];
@@ -10,13 +9,13 @@ type todoList = Item[];
 // Initialize the task list
 let todoList: todoList = [];
 
+// Load tasks from local storage if available
+localStorage.getItem('todoList') ? todoList = JSON.parse(localStorage.getItem('todoList') as string) : null;
+
 // Render existing tasks and set event listeners
 convertTask();
 addEventListenersToButtons('todo-complete-button', markAsCompleted);
 addEventListenersToButtons('todo-delete-button', removeTask);
-
-// Load tasks from local storage if available
-localStorage.getItem('todoList') ? todoList = JSON.parse(localStorage.getItem('todoList') as string) : null;
 
 // Add event listeners for adding tasks
 addTaskButton.addEventListener('click', addTask);
@@ -54,6 +53,7 @@ function convertTask(): void {
       `<li class="todo-item${index}">
         <span class="todo-item-text">${task.text}</span>
         <div class="todo-item-buttons">
+          <button class="todo-edit-button${index}">✎</button>
           <button class="todo-complete-button${index} ${task.completed === true ? 'completed' : ''}">✔</button>
           <button class="todo-delete-button${index}">✖</button>
         </div>
@@ -119,3 +119,39 @@ function removeTask(event: any): void {
   // Save updated task list to local storage
   localStorage.getItem('todoList') ? localStorage.setItem('todoList', JSON.stringify(todoList)) : null;
 }
+
+let classes: NodeListOf<HTMLLIElement> = document.querySelectorAll(`[class^="todo-edit-button"]`) as NodeListOf<HTMLLIElement>;
+let textclasses: NodeListOf<HTMLLIElement> = document.querySelectorAll(`[class^="todo-item-text"]`) as NodeListOf<HTMLLIElement>;
+classes.forEach((className, index) => {
+  className.addEventListener('click', (event: Event) => {
+    console.log(event);
+
+    className.addEventListener("click", () => {
+      const input = document.createElement("input");
+      input.type = "text";
+      input.value = textclasses[index].textContent || "";
+      input.className = "edit-input";
+
+      textclasses[index].replaceWith(input);
+      input.focus();
+
+      function saveAndReplace() {
+        if (document.body.contains(input)) {  // בדיקה אם ה-input עדיין בדף
+          if (!input.parentNode) return; // אם האלמנט כבר הוסר, לא לעשות
+          textclasses[index].textContent = input.value;
+          input.replaceWith(textclasses[index]);
+        }
+      }
+
+      input.addEventListener("blur", () => {
+        saveAndReplace();
+      });
+
+      input.addEventListener("keypress", (event) => {
+        if (event.key === "Enter") {
+          saveAndReplace();
+        }
+      });
+    });
+  });
+});

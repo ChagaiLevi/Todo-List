@@ -79,7 +79,8 @@ body {
 }
 
 [class^="todo-complete-button"],
-[class^="todo-delete-button"] {
+[class^="todo-delete-button"],
+[class^="todo-edit-button"] {
   background-color: transparent;
   border: none;
   cursor: pointer;
@@ -93,6 +94,10 @@ body {
 
 [class^="todo-delete-button"]:hover {
   color: red;
+}
+
+[class^="todo-edit-button"]:hover {
+  color: blue;
 }
 
 .completed {
