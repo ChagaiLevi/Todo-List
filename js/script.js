@@ -96,29 +96,25 @@ function removeTask(event) {
 let classes = document.querySelectorAll(`[class^="todo-edit-button"]`);
 let textclasses = document.querySelectorAll(`[class^="todo-item-text"]`);
 classes.forEach((className, index) => {
-    className.addEventListener('click', (event) => {
-        console.log(event);
+    className.addEventListener('click', () => {
         className.addEventListener("click", () => {
+            const existingInput = document.querySelector(".edit-input");
+            if (existingInput)
+                return; // אם כבר יש input, לא עושים כלום
             const input = document.createElement("input");
             input.type = "text";
             input.value = textclasses[index].textContent || "";
             input.className = "edit-input";
             textclasses[index].replaceWith(input);
             input.focus();
-            function saveAndReplace() {
-                if (document.body.contains(input)) { // בדיקה אם ה-input עדיין בדף
-                    if (!input.parentNode)
-                        return; // אם האלמנט כבר הוסר, לא לעשות
-                    textclasses[index].textContent = input.value;
-                    input.replaceWith(textclasses[index]);
-                }
-            }
             input.addEventListener("blur", () => {
-                saveAndReplace();
+                textclasses[index].textContent = input.value;
+                input.replaceWith(textclasses[index]);
             });
             input.addEventListener("keypress", (event) => {
                 if (event.key === "Enter") {
-                    saveAndReplace();
+                    textclasses[index].textContent = input.value;
+                    input.replaceWith(textclasses[index]);
                 }
             });
         });
