@@ -127,12 +127,13 @@ classes.forEach((className, index) => {
   className.addEventListener('click', () => {
     className.addEventListener("click", () => {
       const existingInput = document.querySelector(".edit-input");
-      if (existingInput) return; // אם כבר יש input, לא עושים כלום
+      if (existingInput) return;
 
       const input = document.createElement("input");
       input.type = "text";
       input.value = textclasses[index].textContent || "";
       input.className = "edit-input";
+      input.classList.add("todo-item-input");
 
       textclasses[index].replaceWith(input);
       input.focus();
@@ -140,6 +141,8 @@ classes.forEach((className, index) => {
       input.addEventListener("blur", () => {
         textclasses[index].textContent = input.value;
         input.replaceWith(textclasses[index]);
+        todoList[index].text = input.value;
+        localStorage.setItem("todoList", JSON.stringify(todoList));
       });
 
       input.addEventListener("keypress", (event) => {
