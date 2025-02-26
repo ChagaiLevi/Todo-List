@@ -117,3 +117,15 @@ body {
 .todo-item-input {
   font-size: 16px;
 }
+
+[class^="no-task"] {
+  text-align: center;
+  margin-top: 20px;
+  font-size: 15px;
+}
+
+.copyright {
+  font-size: 14px;
+  color: #666;
+  margin-top: 20px;
+}

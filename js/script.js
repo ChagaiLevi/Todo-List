@@ -34,7 +34,7 @@ function addTask() {
 }
 // Render tasks in the list
 function convertTask() {
-    todoListContainer.innerHTML = '';
+    todoListContainer.innerHTML = `<div class="no-task">No tasks found!</div>`;
     todoList.forEach((task, index) => {
         todoListContainer.innerHTML +=
             `<li class="todo-item${index}">
@@ -97,29 +97,34 @@ let classes = document.querySelectorAll(`[class^="todo-edit-button"]`);
 let textclasses = document.querySelectorAll(`[class^="todo-item-text"]`);
 classes.forEach((className, index) => {
     className.addEventListener('click', () => {
-        className.addEventListener("click", () => {
-            const existingInput = document.querySelector(".edit-input");
-            if (existingInput)
+        const existingInput = document.querySelector(".edit-input");
+        if (existingInput)
+            return;
+        const input = document.createElement("input");
+        input.type = "text";
+        input.value = textclasses[index].textContent || "";
+        input.className = "edit-input";
+        input.classList.add("todo-item-input");
+        textclasses[index].replaceWith(input);
+        input.focus();
+        input.addEventListener("blur", () => {
+            if (input.value === '') {
+                textclasses[index].textContent = todoList[index].text;
+                input.replaceWith(textclasses[index]);
                 return;
-            const input = document.createElement("input");
-            input.type = "text";
-            input.value = textclasses[index].textContent || "";
-            input.className = "edit-input";
-            input.classList.add("todo-item-input");
-            textclasses[index].replaceWith(input);
-            input.focus();
-            input.addEventListener("blur", () => {
+            }
+            textclasses[index].textContent = input.value;
+            input.replaceWith(textclasses[index]);
+            todoList[index].text = input.value;
+            localStorage.setItem("todoList", JSON.stringify(todoList));
+        });
+        input.addEventListener("keypress", (event) => {
+            if (event.key === "Enter") {
                 textclasses[index].textContent = input.value;
                 input.replaceWith(textclasses[index]);
                 todoList[index].text = input.value;
                 localStorage.setItem("todoList", JSON.stringify(todoList));
-            });
-            input.addEventListener("keypress", (event) => {
-                if (event.key === "Enter") {
-                    textclasses[index].textContent = input.value;
-                    input.replaceWith(textclasses[index]);
-                }
-            });
+            }
         });
     });
 });
