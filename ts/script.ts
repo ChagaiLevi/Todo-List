@@ -1,6 +1,6 @@
 // Select HTML elements
-const newTaskInput: HTMLInputElement = document.querySelector('.todo-input') as HTMLInputElement;
-const addTaskButton: HTMLButtonElement = document.querySelector('.todo-add-button') as HTMLButtonElement;
+const newTaskInput: HTMLInputElement = document.querySelector('#new-task') as HTMLInputElement;
+const addTaskButton: HTMLButtonElement = document.querySelector('#add-btn') as HTMLButtonElement;
 const todoListContainer: HTMLUListElement = document.querySelector('.todo-list') as HTMLUListElement;
 // Define the structure of a task item
 type Item = { text: string, completed: boolean };
@@ -14,8 +14,8 @@ localStorage.getItem('todoList') ? todoList = JSON.parse(localStorage.getItem('t
 
 // Render existing tasks and set event listeners
 convertTask();
-addEventListenersToButtons('todo-complete-button', markAsCompleted);
-addEventListenersToButtons('todo-delete-button', removeTask);
+addEventListenersToButtons('complete-btn', markAsCompleted);
+addEventListenersToButtons('delete-btn', removeTask);
 
 // Add event listeners for adding tasks
 addTaskButton.addEventListener('click', addTask);
@@ -37,8 +37,8 @@ function addTask(): void {
 
   // Update the task list and event listeners
   convertTask();
-  addEventListenersToButtons('todo-complete-button', markAsCompleted);
-  addEventListenersToButtons('todo-delete-button', removeTask);
+  addEventListenersToButtons('complete-btn', markAsCompleted);
+  addEventListenersToButtons('delete-btn', removeTask);
 
   // Save updated task list to local storage
   localStorage.getItem('todoList') ? localStorage.setItem('todoList', JSON.stringify(todoList)) : null;
@@ -46,18 +46,24 @@ function addTask(): void {
 
 // Render tasks in the list
 function convertTask(): void {
-  todoListContainer.innerHTML = `<div class="no-task">No tasks found!</div>`;
+  if (todoList.length === 0) {
+    todoListContainer.innerHTML = `<div class="no-task">No tasks found!</div>`;
+    return;
+  }
+
+  todoListContainer.innerHTML = '';
 
   todoList.forEach((task: Item, index: number) => {
-    todoListContainer.innerHTML +=
-      `<li class="todo-item${index}">
-        <span class="todo-item-text">${task.text}</span>
-        <div class="todo-item-buttons">
-          <button class="todo-edit-button${index}">✎</button>
-          <button class="todo-complete-button${index} ${task.completed === true ? 'completed' : ''}">✔</button>
-          <button class="todo-delete-button${index}">✖</button>
+    todoListContainer.innerHTML += `
+      <div class="todo-item${index}">
+        <p class="task-text">${task.text}</p>
+        <div class="actions">
+          <button class="edit-btn${index}">✎</button>
+          <button class="complete-btn${index} ${task.completed === true ? 'completed' : ''}">✔</button>
+          <button class="delete-btn${index}">✖</button>
         </div>
-      </li>`;
+      </div>
+      `;
   });
 }
 
@@ -113,15 +119,15 @@ function removeTask(event: any): void {
 
   // Update the task list and event listeners
   convertTask();
-  addEventListenersToButtons('todo-complete-button', markAsCompleted);
-  addEventListenersToButtons('todo-delete-button', removeTask);
+  addEventListenersToButtons('complete-btn', markAsCompleted);
+  addEventListenersToButtons('delete-btn', removeTask);
 
   // Save updated task list to local storage
   localStorage.getItem('todoList') ? localStorage.setItem('todoList', JSON.stringify(todoList)) : null;
 }
 
-let classes: NodeListOf<HTMLLIElement> = document.querySelectorAll(`[class^="todo-edit-button"]`) as NodeListOf<HTMLLIElement>;
-let textclasses: NodeListOf<HTMLLIElement> = document.querySelectorAll(`[class^="todo-item-text"]`) as NodeListOf<HTMLLIElement>;
+let classes: NodeListOf<HTMLLIElement> = document.querySelectorAll(`[class^="edit-btn"]`) as NodeListOf<HTMLLIElement>;
+let textclasses: NodeListOf<HTMLLIElement> = document.querySelectorAll(`[class^="task-text"]`) as NodeListOf<HTMLLIElement>;
 
 classes.forEach((className, index) => {
   className.addEventListener('click', () => {

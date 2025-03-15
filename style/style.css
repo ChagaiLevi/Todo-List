@@ -1,121 +1,292 @@
-body {
-  font-family: Arial, sans-serif;
-  background-color: #f7f7f7;
+* {
   margin: 0;
   padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background-color: #121212;
+  /* Darker background for the whole page */
+  color: white;
   display: flex;
   justify-content: center;
   align-items: center;
   height: 100vh;
+  padding: 0;
+  overflow: hidden;
+  opacity: 0;
+  /* Start with hidden body for animation */
+  animation: fadeInBody 1s forwards;
+  /* Smooth fade-in effect */
 }
 
-.todo-container {
-  background: #fff;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  width: 100%;
-  max-width: 400px;
+/* Smooth fade-in for body */
+@keyframes fadeInBody {
+  0% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 1;
+  }
 }
 
-.todo-title {
-  margin: 0 0 20px;
-  text-align: center;
-  color: #333;
-}
-
-.todo-input-wrapper {
+.container {
   display: flex;
-  gap: 10px;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  height: 100vh;
+  /* Full height of the viewport */
+  padding: 20px;
+  background-color: #1c1c1c;
+  /* Dark background for the container */
+  border-radius: 12px;
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.2);
+  overflow-y: auto;
+  animation: fadeInContainer 1s ease-in-out forwards;
+  /* Smooth fade-in for the container */
+}
+
+/* Smooth fade-in for container */
+@keyframes fadeInContainer {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+h1 {
+  text-align: center;
+  color: #00FFFF;
+  /* Super vibrant cyan color */
   margin-bottom: 20px;
+  font-size: 32px;
+  opacity: 0;
+  /* Start with hidden h1 for animation */
+  animation: fadeIn 1s 0.5s forwards;
+  /* Fade in with delay */
+}
+
+/* Smooth fade-in for heading */
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 1;
+  }
 }
 
 .todo-input {
-  flex: 1;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 16px;
+  display: flex;
+  width: 100%;
+  margin-bottom: 20px;
+  opacity: 0;
+  /* Start with hidden input */
+  animation: fadeIn 1s 1s forwards;
+  /* Fade in input with delay */
 }
 
-.todo-add-button {
-  background-color: #007bff;
+.todo-input input {
+  width: 85%;
+  /* Wide input field */
+  padding: 16px;
+  border: 2px solid #00FFFF;
+  /* Cyan border */
+  border-radius: 8px;
+  background-color: #2a2a2a;
+  /* Darker background for the input */
   color: white;
-  border: none;
-  padding: 10px 15px;
-  border-radius: 4px;
-  cursor: pointer;
   font-size: 16px;
+  transition: border-color 0.3s ease;
+  outline: none;
 }
 
-.todo-add-button:hover {
-  background-color: #0056b3;
+.todo-input input:focus {
+  border-color: #00e0e0;
+  /* Lighter cyan when focused */
+  box-shadow: 0 0 8px rgba(0, 255, 255, 0.5);
+  /* Add glow effect on focus */
+}
+
+.todo-input button {
+  width: 15%;
+  /* Wider button to match input */
+  padding: 16px;
+  border: none;
+  background-color: #00B3B3;
+  color: white;
+  font-size: 18px;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  margin-left: 10px;
+}
+
+.todo-input button:hover {
+  background-color: #00e0e0;
+  transform: scale(1.1);
+  /* Slightly increase size on hover for emphasis */
 }
 
 .todo-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
+  width: 100%;
+  flex-grow: 1;
+  overflow-y: auto;
+  opacity: 0;
+  /* Start with hidden todo list */
+  animation: fadeInTodoList 1s 1.5s forwards;
+  /* Fade in todo list with delay */
 }
 
-[class^="todo-item"],
-.todo-item-input {
+/* Smooth fade-in for todo list */
+@keyframes fadeInTodoList {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+[class^="todo-item"] {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  margin-bottom: 10px;
-  background-color: #f9f9f9;
+  background-color: #333;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  width: 100%;
+  flex-wrap: wrap;
 }
 
-.todo-item-text,
 .todo-item-input {
-  flex: 1;
-}
-
-.todo-item-buttons {
+  font-size: 18px;
+  color: #00FFFF;
   display: flex;
-  gap: 10px;
+  justify-content: space-between;
+  background-color: #333;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  width: 82%;
+  flex-wrap: wrap;
 }
 
-[class^="todo-complete-button"],
-[class^="todo-delete-button"],
-[class^="todo-edit-button"] {
+.task-text {
+  width: 80%;
+  /* Make the task text take most of the width */
+  font-size: 18px;
+  color: #00FFFF;
+  font-weight: 500;
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: flex-end;
+  width: 18%;
+}
+
+.actions button {
   background-color: transparent;
   border: none;
+  color: white;
+  font-size: 18px;
   cursor: pointer;
-  font-size: 16px;
-  color: #888;
+  transition: color 0.3s ease;
 }
 
-[class^="todo-complete-button"]:hover {
-  color: green;
+.actions button:hover {
+  color: #00e0e0;
 }
 
-[class^="todo-delete-button"]:hover {
-  color: red;
+.actions .complete-btn {
+  color: #00e0e0;
 }
 
-[class^="todo-edit-button"]:hover {
-  color: blue;
+.actions .delete-btn {
+  color: #ff5050;
 }
 
-.completed {
-  color: green;
-  font-weight: 900;
+.actions .edit-btn {
+  color: #ffcc00;
 }
 
-.copyright {
-  font-size: 12px;
-  color: #717070;
-  margin-top: 20px;
-  text-align: center;
+/* Media Queries for smaller devices */
+@media (max-width: 768px) {
+  .todo-input input {
+    width: 70%;
+    padding: 12px;
+    font-size: 14px;
+  }
+
+  .todo-input button {
+    width: 28%;
+    font-size: 16px;
+  }
+
+  h1 {
+    font-size: 26px;
+  }
+
+  [class^="todo-item"],
+  .todo-item-input {
+    flex-direction: column;
+  }
+
+  .task-text {
+    font-size: 16px;
+  }
+
+  .actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .actions button {
+    font-size: 16px;
+    width: 30%;
+  }
 }
 
-.todo-item-input {
-  font-size: 16px;
+@media (max-width: 480px) {
+  .todo-input input {
+    width: 60%;
+    font-size: 14px;
+  }
+
+  .todo-input button {
+    width: 35%;
+    font-size: 16px;
+  }
+
+  [class^="todo-item"],
+  .todo-item-input {
+    flex-direction: column;
+  }
+
+  .task-text {
+    font-size: 14px;
+  }
+
+  .actions button {
+    font-size: 14px;
+    width: 32%;
+  }
 }
 
 [class^="no-task"] {
@@ -124,8 +295,7 @@ body {
   font-size: 15px;
 }
 
-.copyright {
-  font-size: 14px;
-  color: #666;
-  margin-top: 20px;
+.completed {
+  color: green;
+  font-weight: 1000;
 }

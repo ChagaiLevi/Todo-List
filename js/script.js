@@ -1,7 +1,7 @@
 "use strict";
 // Select HTML elements
-const newTaskInput = document.querySelector('.todo-input');
-const addTaskButton = document.querySelector('.todo-add-button');
+const newTaskInput = document.querySelector('#new-task');
+const addTaskButton = document.querySelector('#add-btn');
 const todoListContainer = document.querySelector('.todo-list');
 // Initialize the task list
 let todoList = [];
@@ -9,8 +9,8 @@ let todoList = [];
 localStorage.getItem('todoList') ? todoList = JSON.parse(localStorage.getItem('todoList')) : null;
 // Render existing tasks and set event listeners
 convertTask();
-addEventListenersToButtons('todo-complete-button', markAsCompleted);
-addEventListenersToButtons('todo-delete-button', removeTask);
+addEventListenersToButtons('complete-btn', markAsCompleted);
+addEventListenersToButtons('delete-btn', removeTask);
 // Add event listeners for adding tasks
 addTaskButton.addEventListener('click', addTask);
 newTaskInput.addEventListener('keyup', (event) => {
@@ -27,24 +27,29 @@ function addTask() {
     todoList.push({ text, completed: false });
     // Update the task list and event listeners
     convertTask();
-    addEventListenersToButtons('todo-complete-button', markAsCompleted);
-    addEventListenersToButtons('todo-delete-button', removeTask);
+    addEventListenersToButtons('complete-btn', markAsCompleted);
+    addEventListenersToButtons('delete-btn', removeTask);
     // Save updated task list to local storage
     localStorage.getItem('todoList') ? localStorage.setItem('todoList', JSON.stringify(todoList)) : null;
 }
 // Render tasks in the list
 function convertTask() {
-    todoListContainer.innerHTML = `<div class="no-task">No tasks found!</div>`;
+    if (todoList.length === 0) {
+        todoListContainer.innerHTML = `<div class="no-task">No tasks found!</div>`;
+        return;
+    }
+    todoListContainer.innerHTML = '';
     todoList.forEach((task, index) => {
-        todoListContainer.innerHTML +=
-            `<li class="todo-item${index}">
-        <span class="todo-item-text">${task.text}</span>
-        <div class="todo-item-buttons">
-          <button class="todo-edit-button${index}">✎</button>
-          <button class="todo-complete-button${index} ${task.completed === true ? 'completed' : ''}">✔</button>
-          <button class="todo-delete-button${index}">✖</button>
+        todoListContainer.innerHTML += `
+      <div class="todo-item${index}">
+        <p class="task-text">${task.text}</p>
+        <div class="actions">
+          <button class="edit-btn${index}">✎</button>
+          <button class="complete-btn${index} ${task.completed === true ? 'completed' : ''}">✔</button>
+          <button class="delete-btn${index}">✖</button>
         </div>
-      </li>`;
+      </div>
+      `;
     });
 }
 // Add event listeners to dynamically created buttons
@@ -88,13 +93,13 @@ function removeTask(event) {
     number === 0 ? todoList.splice(0, 1) : todoList.splice(number, number);
     // Update the task list and event listeners
     convertTask();
-    addEventListenersToButtons('todo-complete-button', markAsCompleted);
-    addEventListenersToButtons('todo-delete-button', removeTask);
+    addEventListenersToButtons('complete-btn', markAsCompleted);
+    addEventListenersToButtons('delete-btn', removeTask);
     // Save updated task list to local storage
     localStorage.getItem('todoList') ? localStorage.setItem('todoList', JSON.stringify(todoList)) : null;
 }
-let classes = document.querySelectorAll(`[class^="todo-edit-button"]`);
-let textclasses = document.querySelectorAll(`[class^="todo-item-text"]`);
+let classes = document.querySelectorAll(`[class^="edit-btn"]`);
+let textclasses = document.querySelectorAll(`[class^="task-text"]`);
 classes.forEach((className, index) => {
     className.addEventListener('click', () => {
         const existingInput = document.querySelector(".edit-input");
@@ -128,4 +133,3 @@ classes.forEach((className, index) => {
         });
     });
 });
-//# sourceMappingURL=script.js.map

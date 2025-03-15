@@ -9,17 +9,40 @@
 </head>
 
 <body>
-  <div class="todo-container">
-    <h1 class="todo-title">To-Do List</h1>
-    <div class="todo-input-wrapper">
-      <input type="text" class="todo-input" placeholder="Add a new task..." />
-      <button class="todo-add-button">Add</button>
+  <div class="container">
+    <h1>Todo List</h1>
+    <div class="todo-input">
+      <input type="text" id="new-task" placeholder="Add a task" />
+      <button id="add-btn">Add</button>
     </div>
-    <ul class="todo-list"></ul>
-    <div class="copyright">&copy; All rights reserved to Chagai Levi Ltd</div>
+    <div class="todo-list">
+      <div class="todo-item">
+        <p class="task-text">Complete the project work that needs more space and longer descriptions.</p>
+        <div class="actions">
+          <button class="edit-btn">✎</button>
+          <button class="complete-btn">✔</button>
+          <button class="delete-btn">✖</button>
+        </div>
+      </div>
+      <div class="todo-item">
+        <p class="task-text">Check all the emails for the day and respond accordingly.</p>
+        <div class="actions">
+          <button class="edit-btn">✎</button>
+          <button class="complete-btn">✔</button>
+          <button class="delete-btn">✖</button>
+        </div>
+      </div>
+      <div class="todo-item">
+        <p class="task-text">Learn about new technologies such as AI, machine learning, and blockchain.</p>
+        <div class="actions">
+          <button class="edit-btn">✎</button>
+          <button class="complete-btn">✔</button>
+          <button class="delete-btn">✖</button>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <script src="https://kit.fontawesome.com/6b38604e10.js" crossorigin="anonymous"></script>
   <script src="js/script.js"></script>
 </body>
 
