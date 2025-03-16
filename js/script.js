@@ -11,6 +11,7 @@ localStorage.getItem('todoList') ? todoList = JSON.parse(localStorage.getItem('t
 convertTask();
 addEventListenersToButtons('complete-btn', markAsCompleted);
 addEventListenersToButtons('delete-btn', removeTask);
+editTask();
 // Add event listeners for adding tasks
 addTaskButton.addEventListener('click', addTask);
 newTaskInput.addEventListener('keyup', (event) => {
@@ -29,6 +30,7 @@ function addTask() {
     convertTask();
     addEventListenersToButtons('complete-btn', markAsCompleted);
     addEventListenersToButtons('delete-btn', removeTask);
+    editTask();
     // Save updated task list to local storage
     localStorage.getItem('todoList') ? localStorage.setItem('todoList', JSON.stringify(todoList)) : null;
 }
@@ -95,41 +97,44 @@ function removeTask(event) {
     convertTask();
     addEventListenersToButtons('complete-btn', markAsCompleted);
     addEventListenersToButtons('delete-btn', removeTask);
+    editTask();
     // Save updated task list to local storage
     localStorage.getItem('todoList') ? localStorage.setItem('todoList', JSON.stringify(todoList)) : null;
 }
-let classes = document.querySelectorAll(`[class^="edit-btn"]`);
-let textclasses = document.querySelectorAll(`[class^="task-text"]`);
-classes.forEach((className, index) => {
-    className.addEventListener('click', () => {
-        const existingInput = document.querySelector(".edit-input");
-        if (existingInput)
-            return;
-        const input = document.createElement("input");
-        input.type = "text";
-        input.value = textclasses[index].textContent || "";
-        input.className = "edit-input";
-        input.classList.add("todo-item-input");
-        textclasses[index].replaceWith(input);
-        input.focus();
-        input.addEventListener("blur", () => {
-            if (input.value === '') {
-                textclasses[index].textContent = todoList[index].text;
-                input.replaceWith(textclasses[index]);
+function editTask() {
+    let classes = document.querySelectorAll(`[class^="edit-btn"]`);
+    let textclasses = document.querySelectorAll(`[class^="task-text"]`);
+    classes.forEach((className, index) => {
+        className.addEventListener('click', () => {
+            const existingInput = document.querySelector(".edit-input");
+            if (existingInput)
                 return;
-            }
-            textclasses[index].textContent = input.value;
-            input.replaceWith(textclasses[index]);
-            todoList[index].text = input.value;
-            localStorage.setItem("todoList", JSON.stringify(todoList));
-        });
-        input.addEventListener("keypress", (event) => {
-            if (event.key === "Enter") {
+            const input = document.createElement("input");
+            input.type = "text";
+            input.value = textclasses[index].textContent || "";
+            input.className = "edit-input";
+            input.classList.add("todo-item-input");
+            textclasses[index].replaceWith(input);
+            input.focus();
+            input.addEventListener("blur", () => {
+                if (input.value === '') {
+                    textclasses[index].textContent = todoList[index].text;
+                    input.replaceWith(textclasses[index]);
+                    return;
+                }
                 textclasses[index].textContent = input.value;
                 input.replaceWith(textclasses[index]);
                 todoList[index].text = input.value;
                 localStorage.setItem("todoList", JSON.stringify(todoList));
-            }
+            });
+            input.addEventListener("keypress", (event) => {
+                if (event.key === "Enter") {
+                    textclasses[index].textContent = input.value;
+                    input.replaceWith(textclasses[index]);
+                    todoList[index].text = input.value;
+                    localStorage.setItem("todoList", JSON.stringify(todoList));
+                }
+            });
         });
     });
-});
+}

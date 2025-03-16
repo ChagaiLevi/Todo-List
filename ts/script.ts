@@ -16,6 +16,7 @@ localStorage.getItem('todoList') ? todoList = JSON.parse(localStorage.getItem('t
 convertTask();
 addEventListenersToButtons('complete-btn', markAsCompleted);
 addEventListenersToButtons('delete-btn', removeTask);
+editTask();
 
 // Add event listeners for adding tasks
 addTaskButton.addEventListener('click', addTask);
@@ -39,6 +40,7 @@ function addTask(): void {
   convertTask();
   addEventListenersToButtons('complete-btn', markAsCompleted);
   addEventListenersToButtons('delete-btn', removeTask);
+  editTask();
 
   // Save updated task list to local storage
   localStorage.getItem('todoList') ? localStorage.setItem('todoList', JSON.stringify(todoList)) : null;
@@ -121,49 +123,52 @@ function removeTask(event: any): void {
   convertTask();
   addEventListenersToButtons('complete-btn', markAsCompleted);
   addEventListenersToButtons('delete-btn', removeTask);
+  editTask();
 
   // Save updated task list to local storage
   localStorage.getItem('todoList') ? localStorage.setItem('todoList', JSON.stringify(todoList)) : null;
 }
 
-let classes: NodeListOf<HTMLLIElement> = document.querySelectorAll(`[class^="edit-btn"]`) as NodeListOf<HTMLLIElement>;
-let textclasses: NodeListOf<HTMLLIElement> = document.querySelectorAll(`[class^="task-text"]`) as NodeListOf<HTMLLIElement>;
+function editTask(): void {
+  let classes: NodeListOf<HTMLLIElement> = document.querySelectorAll(`[class^="edit-btn"]`) as NodeListOf<HTMLLIElement>;
+  let textclasses: NodeListOf<HTMLLIElement> = document.querySelectorAll(`[class^="task-text"]`) as NodeListOf<HTMLLIElement>;
 
-classes.forEach((className, index) => {
-  className.addEventListener('click', () => {
-    const existingInput = document.querySelector(".edit-input");
-    if (existingInput) return;
+  classes.forEach((className, index) => {
+    className.addEventListener('click', () => {
+      const existingInput = document.querySelector(".edit-input");
+      if (existingInput) return;
 
-    const input = document.createElement("input");
-    input.type = "text";
-    input.value = textclasses[index].textContent || "";
-    input.className = "edit-input";
-    input.classList.add("todo-item-input");
+      const input = document.createElement("input");
+      input.type = "text";
+      input.value = textclasses[index].textContent || "";
+      input.className = "edit-input";
+      input.classList.add("todo-item-input");
 
-    textclasses[index].replaceWith(input);
-    input.focus();
+      textclasses[index].replaceWith(input);
+      input.focus();
 
-    input.addEventListener("blur", () => {
-      if (input.value === '') {
-        textclasses[index].textContent = todoList[index].text;
-        input.replaceWith(textclasses[index]);
-        return;
-      }
+      input.addEventListener("blur", () => {
+        if (input.value === '') {
+          textclasses[index].textContent = todoList[index].text;
+          input.replaceWith(textclasses[index]);
+          return;
+        }
 
-      textclasses[index].textContent = input.value;
-      input.replaceWith(textclasses[index]);
-
-      todoList[index].text = input.value;
-      localStorage.setItem("todoList", JSON.stringify(todoList));
-    });
-
-    input.addEventListener("keypress", (event) => {
-      if (event.key === "Enter") {
         textclasses[index].textContent = input.value;
         input.replaceWith(textclasses[index]);
+
         todoList[index].text = input.value;
         localStorage.setItem("todoList", JSON.stringify(todoList));
-      }
+      });
+
+      input.addEventListener("keypress", (event) => {
+        if (event.key === "Enter") {
+          textclasses[index].textContent = input.value;
+          input.replaceWith(textclasses[index]);
+          todoList[index].text = input.value;
+          localStorage.setItem("todoList", JSON.stringify(todoList));
+        }
+      });
     });
   });
-});
+}
