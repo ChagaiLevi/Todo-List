@@ -297,6 +297,6 @@ h1 {
 }
 
 .completed {
-  color: green;
+  color: #00FFFF !important;
   font-weight: 1000;
 }
