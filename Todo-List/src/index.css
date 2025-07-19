@@ -1,68 +1,302 @@
-:root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
-
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
 body {
-  margin: 0;
+  font-family: Arial, sans-serif;
+  background-color: #121212;
+  /* Darker background for the whole page */
+  color: white;
   display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  padding: 0;
+  overflow: hidden;
+  opacity: 0;
+  /* Start with hidden body for animation */
+  animation: fadeInBody 1s forwards;
+  /* Smooth fade-in effect */
+}
+
+/* Smooth fade-in for body */
+@keyframes fadeInBody {
+  0% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 1;
+  }
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  height: 100vh;
+  /* Full height of the viewport */
+  padding: 20px;
+  background-color: #1c1c1c;
+  /* Dark background for the container */
+  border-radius: 12px;
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.2);
+  overflow-y: auto;
+  animation: fadeInContainer 1s ease-in-out forwards;
+  /* Smooth fade-in for the container */
+}
+
+/* Smooth fade-in for container */
+@keyframes fadeInContainer {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+  text-align: center;
+  color: #00FFFF;
+  /* Super vibrant cyan color */
+  margin-bottom: 20px;
+  font-size: 32px;
+  opacity: 0;
+  /* Start with hidden h1 for animation */
+  animation: fadeIn 1s 0.5s forwards;
+  /* Fade in with delay */
 }
 
-button {
+/* Smooth fade-in for heading */
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 1;
+  }
+}
+
+.todo-input {
+  display: flex;
+  width: 100%;
+  margin-bottom: 20px;
+  opacity: 0;
+  /* Start with hidden input */
+  animation: fadeIn 1s 1s forwards;
+  /* Fade in input with delay */
+}
+
+.todo-input input {
+  width: 85%;
+  /* Wide input field */
+  padding: 16px;
+  border: 2px solid #00FFFF;
+  /* Cyan border */
   border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+  background-color: #2a2a2a;
+  /* Darker background for the input */
+  color: white;
+  font-size: 16px;
+  transition: border-color 0.3s ease;
+  outline: none;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
+.todo-input input:focus {
+  border-color: #00e0e0;
+  /* Lighter cyan when focused */
+  box-shadow: 0 0 8px rgba(0, 255, 255, 0.5);
+  /* Add glow effect on focus */
+}
+
+.todo-input button {
+  width: 15%;
+  /* Wider button to match input */
+  padding: 16px;
+  border: none;
+  background-color: #00B3B3;
+  color: white;
+  font-size: 18px;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  margin-left: 10px;
+}
+
+.todo-input button:hover {
+  background-color: #00e0e0;
+  transform: scale(1.1);
+  /* Slightly increase size on hover for emphasis */
+}
+
+.todo-list {
+  width: 100%;
+  flex-grow: 1;
+  overflow-y: auto;
+  opacity: 0;
+  /* Start with hidden todo list */
+  animation: fadeInTodoList 1s 1.5s forwards;
+  /* Fade in todo list with delay */
+}
+
+/* Smooth fade-in for todo list */
+@keyframes fadeInTodoList {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
   }
-  a:hover {
-    color: #747bff;
+
+  100% {
+    opacity: 1;
+    transform: translateY(0);
   }
-  button {
-    background-color: #f9f9f9;
+}
+
+[class^="todo-item"] {
+  display: flex;
+  justify-content: space-between;
+  background-color: #333;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  width: 100%;
+  flex-wrap: wrap;
+}
+
+.todo-item-input {
+  font-size: 18px;
+  color: #00FFFF;
+  display: flex;
+  justify-content: space-between;
+  background-color: #333;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  width: 82%;
+  flex-wrap: wrap;
+}
+
+.task-text {
+  width: 80%;
+  /* Make the task text take most of the width */
+  font-size: 18px;
+  color: #00FFFF;
+  font-weight: 500;
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: flex-end;
+  width: 18%;
+}
+
+.actions button {
+  background-color: transparent;
+  border: none;
+  color: white;
+  font-size: 18px;
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+.actions button:hover {
+  color: #00e0e0;
+}
+
+.actions .complete-btn {
+  color: #00e0e0;
+}
+
+.actions .delete-btn {
+  color: #ff5050;
+}
+
+.actions .edit-btn {
+  color: #ffcc00;
+}
+
+/* Media Queries for smaller devices */
+@media (max-width: 768px) {
+  .todo-input input {
+    width: 70%;
+    padding: 12px;
+    font-size: 14px;
   }
+
+  .todo-input button {
+    width: 28%;
+    font-size: 16px;
+  }
+
+  h1 {
+    font-size: 26px;
+  }
+
+  [class^="todo-item"],
+  .todo-item-input {
+    flex-direction: column;
+  }
+
+  .task-text {
+    font-size: 16px;
+  }
+
+  .actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .actions button {
+    font-size: 16px;
+    width: 30%;
+  }
+}
+
+@media (max-width: 480px) {
+  .todo-input input {
+    width: 60%;
+    font-size: 14px;
+  }
+
+  .todo-input button {
+    width: 35%;
+    font-size: 16px;
+  }
+
+  [class^="todo-item"],
+  .todo-item-input {
+    flex-direction: column;
+  }
+
+  .task-text {
+    font-size: 14px;
+  }
+
+  .actions button {
+    font-size: 14px;
+    width: 32%;
+  }
+}
+
+[class^="no-task"] {
+  text-align: center;
+  margin-top: 20px;
+  font-size: 20px;
+  color: #00FFFF;
+}
+
+.completed {
+  color: #00FFFF !important;
+  font-weight: 1000;
 }
