@@ -1,31 +1,19 @@
-const ListTasks = () => {
+import LineTasks from './LineTasks';
+import { type TasksListProps } from '../App';
+
+const ListTasks: React.FC<{ tasks: TasksListProps[], setTasks: React.Dispatch<React.SetStateAction<TasksListProps[]>> }> = ({ tasks, setTasks }) => {
+  let index: number = 0.6;
+
   return (
     <div className="todo-list">
-      <div className="todo-item">
-        <p className="task-text">Complete the project work that needs more space and longer descriptions.</p>
-        <div className="actions">
-          <button className="edit-btn">✎</button>
-          <button className="complete-btn">✔</button>
-          <button className="delete-btn">✖</button>
-        </div>
-      </div>
-      <div className="todo-item">
-        <p className="task-text">Check all the emails for the day and respond accordingly.</p>
-        <div className="actions">
-          <button className="edit-btn">✎</button>
-          <button className="complete-btn">✔</button>
-          <button className="delete-btn">✖</button>
-        </div>
-      </div>
-      <div className="todo-item">
-        <p className="task-text">Learn about new technologies such as AI, machine learning, and blockchain.</p>
-        <div className="actions">
-          <button className="edit-btn">✎</button>
-          <button className="complete-btn">✔</button>
-          <button className="delete-btn">✖</button>
-        </div>
-      </div>
+      {tasks.slice().reverse().map((task: TasksListProps) => {
+        index += 0.2;
+        return (
+          <LineTasks task={task} key={task.id} index={index} tasks={tasks} setTasks={setTasks} />
+        )
+      })}
     </div>
+
   )
 }
 
