@@ -218,7 +218,6 @@ h1 {
   }
 }
 
-/* Keyframes for animations */
 @keyframes fadeIn {
   from {
     opacity: 0;

@@ -20,7 +20,6 @@ function App() {
   const [text, setText] = useState<string>('');
   const prevTasks = useRef(tasks);
 
-  //useEffect(() => { }, []);
   useEffect(() => {
     if (prevTasks.current !== tasks) {
       localStorage.setItem('tasks', JSON.stringify(tasks));

@@ -2,7 +2,7 @@ import { type TasksListProps } from "../App";
 
 
 const LineTasks: React.FC<{ task: TasksListProps, index: number, tasks: TasksListProps[], setTasks: React.Dispatch<React.SetStateAction<TasksListProps[]>>, i: number }> = ({ task, index, tasks, setTasks, i }) => {
-  const handleEdit = (id: any) => {
+  const handleEdit = (id: string) => {
 
 
     setTasks(tasks.map(task =>
@@ -10,13 +10,13 @@ const LineTasks: React.FC<{ task: TasksListProps, index: number, tasks: TasksLis
     ));
   };
 
-  const handleSave = (id: any, newText: any) => {
+  const handleSave = (id: string, newText: string) => {
     setTasks(tasks.map(task =>
       task.id === id ? { ...task, text: newText || task.text, isEditing: false } : task
     ));
   };
 
-  const handleComplete = (id: any) => {
+  const handleComplete = (id: string) => {
     setTasks(tasks.map(task =>
       task.id === id ? { ...task, completed: !task.completed } : task
     ));
@@ -28,7 +28,7 @@ const LineTasks: React.FC<{ task: TasksListProps, index: number, tasks: TasksLis
     ));
     setTimeout(() => {
       setTasks(tasks.filter(task => task.id !== id));
-    }, 500); // Match duration of fadeOut animation
+    }, 500);
   };
 
   return (
