@@ -1,7 +1,7 @@
 import { type TasksListProps } from "../App";
 
 
-const LineTasks: React.FC<{ task: TasksListProps, index: number, tasks: TasksListProps[], setTasks: React.Dispatch<React.SetStateAction<TasksListProps[]>> }> = ({ task, index, tasks, setTasks }) => {
+const LineTasks: React.FC<{ task: TasksListProps, index: number, tasks: TasksListProps[], setTasks: React.Dispatch<React.SetStateAction<TasksListProps[]>>, i: number }> = ({ task, index, tasks, setTasks, i }) => {
   const handleEdit = (id: any) => {
 
 
@@ -23,7 +23,7 @@ const LineTasks: React.FC<{ task: TasksListProps, index: number, tasks: TasksLis
   };
 
   return (
-    <div className="todo-item" key={task.id} style={{ animationDelay: `${0.8 + index * 0.2}s` }}>
+    <div className="todo-item" key={task.id} style={{ /*animationDelay: `${0.8 + i * 0.2}s`,*/ animation: `slideIn 0.8s ease-out ${index}s forwards; }` }}>
       {task.isEditing ? (
         <input
           type="text"

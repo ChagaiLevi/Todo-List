@@ -6,10 +6,10 @@ const ListTasks: React.FC<{ tasks: TasksListProps[], setTasks: React.Dispatch<Re
 
   return (
     <div className="todo-list">
-      {tasks.slice().reverse().map((task: TasksListProps) => {
+      {tasks.slice().reverse().map((task: TasksListProps, i: number) => {
         index += 0.2;
         return (
-          <LineTasks task={task} key={task.id} index={index} tasks={tasks} setTasks={setTasks} />
+          <LineTasks task={task} key={task.id} index={index} tasks={tasks} setTasks={setTasks} i={i} />
         )
       })}
     </div>

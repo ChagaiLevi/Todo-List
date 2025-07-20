@@ -1,7 +1,8 @@
 import Title from "./Components/Title"
 import AddTask from "./Components/AddTask"
 import ListTasks from "./Components/ListTasks"
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 
 export type TasksListProps = {
   id: string;
@@ -11,66 +12,40 @@ export type TasksListProps = {
 }
 
 function App() {
-  const [tasks, setTasks] = useState<TasksListProps[]>([
-    { id: '1', text: 'Sample Task 1', completed: false, isEditing: false },
-    { id: '2', text: 'Sample Task 2', completed: true, isEditing: false },
-    { id: '3', text: 'Sample Task 3', completed: false, isEditing: false }
-  ]);
+  const [tasks, setTasks] = useState<TasksListProps[]>(() => {
+    const savedTasks = localStorage.getItem('tasks');
+    return savedTasks ? JSON.parse(savedTasks) : [];
+  });
+  const [text, setText] = useState<string>('');
+  const prevTasks = useRef(tasks);
 
+  //useEffect(() => { }, []);
   useEffect(() => {
-    localStorage.setItem('tasks', JSON.stringify(tasks));
+    if (prevTasks.current !== tasks) {
+      localStorage.setItem('tasks', JSON.stringify(tasks));
+    }
 
-    /*const editButtons: NodeListOf<HTMLParagraphElement> = document.querySelectorAll('.edit-btn');
-
-    editButtons.forEach(button => {
-      button.addEventListener('click', () => {
-        const item: any = button.closest('.todo-item');
-        const taskText = item.querySelector('.task-text');
-        const currentText = taskText.textContent;
-
-        // Create input element
-        const input = document.createElement('input');
-        input.type = 'text';
-        input.className = 'task-input';
-        input.value = currentText;
-
-        // Replace p with input
-        taskText.replaceWith(input);
-        input.focus();
-
-        // Function to save and revert to p
-        const saveTask = () => {
-          const newText = input.value.trim();
-          const newP = document.createElement('p');
-          newP.className = 'task-text';
-          newP.textContent = newText || currentText; // Use original text if empty
-          input.replaceWith(newP);
-        };
-
-        // Save on blur
-        input.addEventListener('blur', saveTask);
-
-        // Save on Enter key
-        input.addEventListener('keydown', (e) => {
-          if (e.key === 'Enter') {
-            saveTask();
-          }
-        });
-      });
-    });*/
+    prevTasks.current = tasks;
   }, [tasks]);
 
-  //document.addEventListener('DOMContentLoaded', () => {
+  const addTask: () => void = () => {
+    if (text.trim() === '') return;
 
-  //});
+    const newTask: TasksListProps = {
+      id: uuidv4(),
+      text,
+      completed: false,
+      isEditing: false
+    };
 
-
-
+    setTasks([...tasks, newTask]);
+    setText('');
+  }
 
   return (
     <div className="container">
       <Title />
-      <AddTask />
+      <AddTask addTask={addTask} setText={setText} text={text} />
       <ListTasks tasks={tasks} setTasks={setTasks} />
     </div>
   )
