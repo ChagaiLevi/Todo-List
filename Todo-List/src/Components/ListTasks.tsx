@@ -12,6 +12,9 @@ const ListTasks: React.FC<{ tasks: TasksListProps[], setTasks: React.Dispatch<Re
           <LineTasks task={task} key={task.id} index={index} tasks={tasks} setTasks={setTasks} i={i} />
         )
       })}
+      {tasks.length === 0 && (
+        <p className="no-tasks">No Tasks</p>
+      )}
     </div>
 
   )
