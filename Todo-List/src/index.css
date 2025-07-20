@@ -202,6 +202,22 @@ h1 {
   animation: slideIn 0.8s ease-out 0.8s forwards;
 }
 
+.todo-item.deleting {
+  animation: fadeOut 0.5s ease-out forwards;
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  to {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+}
+
 /* Keyframes for animations */
 @keyframes fadeIn {
   from {

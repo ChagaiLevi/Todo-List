@@ -9,6 +9,7 @@ export type TasksListProps = {
   text: string;
   completed: boolean;
   isEditing: boolean;
+  isDeleting: boolean;
 }
 
 function App() {
@@ -35,7 +36,8 @@ function App() {
       id: uuidv4(),
       text,
       completed: false,
-      isEditing: false
+      isEditing: false,
+      isDeleting: false
     };
 
     setTasks([...tasks, newTask]);

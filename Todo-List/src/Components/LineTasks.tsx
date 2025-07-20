@@ -22,8 +22,17 @@ const LineTasks: React.FC<{ task: TasksListProps, index: number, tasks: TasksLis
     ));
   };
 
+  const handleDelete = (id: string) => {
+    setTasks(tasks.map(task =>
+      task.id === id ? { ...task, isDeleting: true } : task
+    ));
+    setTimeout(() => {
+      setTasks(tasks.filter(task => task.id !== id));
+    }, 500); // Match duration of fadeOut animation
+  };
+
   return (
-    <div className="todo-item" key={task.id} style={{ /*animationDelay: `${0.8 + i * 0.2}s`,*/ animation: `slideIn 0.8s ease-out ${index}s forwards; }` }}>
+    <div className={`todo-item ${task.isDeleting ? 'deleting' : ''}`} key={task.id} style={{ /*animationDelay: `${0.8 + i * 0.2}s`,*/ animation: `slideIn 0.8s ease-out ${index}s forwards; }` }}>
       {task.isEditing ? (
         <input
           type="text"
@@ -44,7 +53,7 @@ const LineTasks: React.FC<{ task: TasksListProps, index: number, tasks: TasksLis
       <div className="actions">
         <button className="edit-btn" onClick={() => handleEdit(task.id)}>✎</button>
         <button className="complete-btn" onClick={() => handleComplete(task.id)}>✔</button>
-        <button className="delete-btn" onClick={() => setTasks(tasks.filter((item: TasksListProps) => item.id !== task.id))}>✖</button>
+        <button className="delete-btn" onClick={() => /*setTasks(tasks.filter((item: TasksListProps) => item.id !== task.id))*/ handleDelete(task.id)}>✖</button>
       </div>
     </div>
     /*<div className="todo-item" key={task.id} style={{ animation: `slideIn 0.8s ease-out ${index}s forwards` }}>
