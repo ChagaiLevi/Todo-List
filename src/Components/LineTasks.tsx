@@ -56,14 +56,6 @@ const LineTasks: React.FC<{ task: TasksListProps, index: number, tasks: TasksLis
         <button className="delete-btn" onClick={() => /*setTasks(tasks.filter((item: TasksListProps) => item.id !== task.id))*/ handleDelete(task.id)}>✖</button>
       </div>
     </div>
-    /*<div className="todo-item" key={task.id} style={{ animation: `slideIn 0.8s ease-out ${index}s forwards` }}>
-      <p className="task-text">{task.text}</p>
-      <div className="actions">
-        <button className="edit-btn">✎</button>
-        <button className={`complete-btn ${task.completed ? 'completed' : ''}`}>✔</button>
-        <button className="delete-btn">✖</button>
-      </div>
-    </div>*/
   )
 }
 
