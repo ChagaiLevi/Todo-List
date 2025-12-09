@@ -1,10 +1,8 @@
 import { type TasksListProps } from "../App";
 
 
-const LineTasks: React.FC<{ task: TasksListProps, index: number, tasks: TasksListProps[], setTasks: React.Dispatch<React.SetStateAction<TasksListProps[]>>, i: number }> = ({ task, index, tasks, setTasks, i }) => {
+const LineTasks: React.FC<{ task: TasksListProps, index: number, tasks: TasksListProps[], setTasks: React.Dispatch<React.SetStateAction<TasksListProps[]>>, }> = ({ task, index, tasks, setTasks }) => {
   const handleEdit = (id: string) => {
-
-
     setTasks(tasks.map(task =>
       task.id === id ? { ...task, isEditing: true } : task
     ));
@@ -14,11 +12,12 @@ const LineTasks: React.FC<{ task: TasksListProps, index: number, tasks: TasksLis
     setTasks(tasks.map(task =>
       task.id === id ? { ...task, text: newText || task.text, isEditing: false } : task
     ));
+
   };
 
-  const handleComplete = (id: string) => {
+  const handleComplete = (id: string, forSure: boolean = true) => {
     setTasks(tasks.map(task =>
-      task.id === id ? { ...task, completed: !task.completed } : task
+      task.id === id ? { ...task, completed: forSure ? !task.completed : forSure } : task
     ));
   };
 
@@ -43,7 +42,11 @@ const LineTasks: React.FC<{ task: TasksListProps, index: number, tasks: TasksLis
           ))}
           onBlur={() => handleSave(task.id, task.text)}
           onKeyDown={(e) => {
-            if (e.key === 'Enter') handleSave(task.id, task.text);
+            if (e.key === 'Enter') {
+              handleSave(task.id, task.text);
+              // TODO: Need to fix toggling complete on enter keypress
+              //// handleComplete(task.id, false);
+            }
           }}
           autoFocus
         />
