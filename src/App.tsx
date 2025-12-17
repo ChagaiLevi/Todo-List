@@ -29,7 +29,7 @@ function App() {
   }, [tasks]);
 
   const addTask: () => void = () => {
-    if (text.trim() === '') return;
+    if (!text.trim()) return;
 
     const newTask: TasksListProps = {
       id: uuidv4(),
