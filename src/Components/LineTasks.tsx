@@ -1,6 +1,5 @@
+import { useRef } from "react";
 import { type TasksListProps } from "../App";
-
-// TODO: Add message to move buttons and get cancel option
 
 type LineTasksProps = {
   task: TasksListProps;
@@ -10,24 +9,35 @@ type LineTasksProps = {
 }
 
 const LineTasks: React.FC<LineTasksProps> = ({ task, index, tasks, setTasks }) => {
+  const oldTaskText = useRef<string>('');
+
   const handleEdit: (id: string) => void = (id) => {
+    oldTaskText.current = task.text;
     setTasks(tasks.map(task =>
       task.id === id ? { ...task, isEditing: true } : task
     ));
   };
 
-  // ? Why we need newText param? Can we remove it? and just use in funtion in app.tsx?
   const handleSave: (id: string, newText: string) => void = (id, newText) => {
-    setTasks(tasks.map(task =>
-      task.id === id ? { ...task, text: newText || task.text, isEditing: false } : task
+    const prev: string = oldTaskText.current || '';
+    const prevTrim: string = prev.trim();
+    const newTrim: string = (newText || '').trim();
+    const added: boolean = newTrim.length > prevTrim.length; // user added content
+
+    setTasks(tasks.map(t =>
+      t.id === id
+        ? { ...t, text: newText || t.text, isEditing: false, completed: (t.completed && added) ? false : t.completed }
+        : t
     ));
 
+    oldTaskText.current = newText || '';
   };
 
-  const handleComplete: (id: string, forSure?: boolean) => void = (id, forSure = true) => {
-    setTasks(tasks.map(task =>
-      task.id === id ? { ...task, completed: forSure ? !task.completed : forSure } : task
+  const handleComplete: (id: string) => void = (id) => {
+    setTasks(tasks.map(t =>
+      t.id === id ? { ...t, completed: !t.completed, isEditing: false } : t
     ));
+    oldTaskText.current = task.text;
   };
 
   const handleDelete: (id: string) => void = (id) => {
@@ -44,7 +54,8 @@ const LineTasks: React.FC<LineTasksProps> = ({ task, index, tasks, setTasks }) =
     <div
       className={`todo-item ${task.isDeleting ? 'deleting' : ''}`}
       key={task.id}
-      style={{ animation: `slideIn 0.8s ease-out ${index}s forwards; }` }}
+      // Fixed: clean animation string
+      style={{ animation: `slideIn 0.8s ease-out ${index}s forwards` }}
     >
       {task.isEditing ? (
         <input
@@ -57,9 +68,8 @@ const LineTasks: React.FC<LineTasksProps> = ({ task, index, tasks, setTasks }) =
           onBlur={() => handleSave(task.id, task.text)}
           onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
             if (e.key === 'Enter') {
+              // Save changes on Enter. Do NOT force toggle completed here.
               handleSave(task.id, task.text);
-              // TODO: Need to fix toggling complete on enter keypress
-              // handleComplete(task.id, false);
             }
           }}
           autoFocus
