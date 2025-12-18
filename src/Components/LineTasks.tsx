@@ -10,7 +10,6 @@ type LineTasksProps = {
 
 const LineTasks: React.FC<LineTasksProps> = ({ task, index, tasks, setTasks }) => {
   const oldTaskText = useRef<string>('');
-
   const handleEdit: (id: string) => void = (id) => {
     oldTaskText.current = task.text;
     setTasks(tasks.map(task =>
@@ -22,7 +21,7 @@ const LineTasks: React.FC<LineTasksProps> = ({ task, index, tasks, setTasks }) =
     const prev: string = oldTaskText.current || '';
     const prevTrim: string = prev.trim();
     const newTrim: string = (newText || '').trim();
-    const added: boolean = newTrim.length > prevTrim.length; // user added content
+    const added: boolean = newTrim.length > prevTrim.length;
 
     setTasks(tasks.map(t =>
       t.id === id
@@ -37,6 +36,7 @@ const LineTasks: React.FC<LineTasksProps> = ({ task, index, tasks, setTasks }) =
     setTasks(tasks.map(t =>
       t.id === id ? { ...t, completed: !t.completed, isEditing: false } : t
     ));
+
     oldTaskText.current = task.text;
   };
 
@@ -45,6 +45,7 @@ const LineTasks: React.FC<LineTasksProps> = ({ task, index, tasks, setTasks }) =
       // ? Why we need to set isDeleting true here? Can we just filter directly?
       task.id === id ? { ...task, isDeleting: true } : task
     ));
+
     setTimeout(() => {
       setTasks(tasks.filter(task => task.id !== id));
     }, 500);
@@ -54,7 +55,6 @@ const LineTasks: React.FC<LineTasksProps> = ({ task, index, tasks, setTasks }) =
     <div
       className={`todo-item ${task.isDeleting ? 'deleting' : ''}`}
       key={task.id}
-      // Fixed: clean animation string
       style={{ animation: `slideIn 0.8s ease-out ${index}s forwards` }}
     >
       {task.isEditing ? (
@@ -68,7 +68,6 @@ const LineTasks: React.FC<LineTasksProps> = ({ task, index, tasks, setTasks }) =
           onBlur={() => handleSave(task.id, task.text)}
           onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
             if (e.key === 'Enter') {
-              // Save changes on Enter. Do NOT force toggle completed here.
               handleSave(task.id, task.text);
             }
           }}
