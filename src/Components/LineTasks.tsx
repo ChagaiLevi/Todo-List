@@ -42,20 +42,24 @@ const LineTasks: React.FC<LineTasksProps> = ({ task, index, tasks, setTasks }) =
 
   const handleDelete: (id: string) => void = (id) => {
     setTasks(tasks.map(task =>
-      // ? Why we need to set isDeleting true here? Can we just filter directly?
       task.id === id ? { ...task, isDeleting: true } : task
     ));
 
     setTimeout(() => {
-      setTasks(tasks.filter(task => task.id !== id));
+      setTasks(prev => prev.filter(task => task.id !== id));
     }, 500);
   };
+
+  const animationDelay = `${index * 0.1}s`;
+  const animationStyle: React.CSSProperties = task.isDeleting
+    ? { animation: `fadeOut 0.5s ease-out forwards` }
+    : { animation: `slideIn 0.8s ease-out ${animationDelay} forwards` };
 
   return (
     <div
       className={`todo-item ${task.isDeleting ? 'deleting' : ''}`}
       key={task.id}
-      style={{ animation: `slideIn 0.8s ease-out ${index}s forwards` }}
+      style={animationStyle}
     >
       {task.isEditing ? (
         <input
