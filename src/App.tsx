@@ -1,6 +1,7 @@
 import Title from "./Components/Title"
 import AddTask from "./Components/AddTask"
 import ListTasks from "./Components/ListTasks"
+import UndoToast from "./Components/UndoToast";
 import { useState, useEffect, useRef } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -18,6 +19,7 @@ function App() {
     return savedTasks ? JSON.parse(savedTasks) : [];
   });
   const [text, setText] = useState<string>('');
+  const [className, setClassName] = useState<string>('');
   const prevTasks = useRef(tasks);
 
   useEffect(() => {
@@ -47,7 +49,8 @@ function App() {
     <div className="container">
       <Title />
       <AddTask addTask={addTask} setText={setText} text={text} />
-      <ListTasks tasks={tasks} setTasks={setTasks} />
+      <ListTasks tasks={tasks} setTasks={setTasks} className={className} setClassName={setClassName} />
+      <UndoToast className={className} setClassName={setClassName} />
     </div>
   )
 }

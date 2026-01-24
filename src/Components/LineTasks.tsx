@@ -6,9 +6,11 @@ type LineTasksProps = {
   index: number;
   tasks: TasksListProps[];
   setTasks: React.Dispatch<React.SetStateAction<TasksListProps[]>>;
+  className: string;
+  setClassName: React.Dispatch<React.SetStateAction<string>>;
 }
 
-const LineTasks: React.FC<LineTasksProps> = ({ task, index, tasks, setTasks }) => {
+const LineTasks: React.FC<LineTasksProps> = ({ task, index, tasks, setTasks, className, setClassName }) => {
   const oldTaskText = useRef<string>('');
   const handleEdit: (id: string) => void = (id) => {
     oldTaskText.current = task.text;
@@ -44,6 +46,12 @@ const LineTasks: React.FC<LineTasksProps> = ({ task, index, tasks, setTasks }) =
     setTasks(tasks.map(task =>
       task.id === id ? { ...task, isDeleting: true } : task
     ));
+
+    setClassName('entering');
+    setTimeout(() => {
+      setClassName('exiting');
+    }, 5000);
+
 
     setTimeout(() => {
       setTasks(prev => prev.filter(task => task.id !== id));
