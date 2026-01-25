@@ -20,14 +20,16 @@ function App() {
   });
   const [text, setText] = useState<string>('');
   const [className, setClassName] = useState<string>('');
-  const prevTasks = useRef(tasks);
+  const [prevTasks, setPrevTasks] = useState<TasksListProps[]>([]);
+  const [timeOut, setTimeOut] = useState<any>(null);
+  const prevTasksRef = useRef(tasks);
 
   useEffect(() => {
-    if (prevTasks.current !== tasks) {
+    if (prevTasksRef.current !== tasks) {
       localStorage.setItem('tasks', JSON.stringify(tasks));
     }
 
-    prevTasks.current = tasks;
+    prevTasksRef.current = tasks;
   }, [tasks]);
 
   const addTask: () => void = () => {
@@ -49,8 +51,8 @@ function App() {
     <div className="container">
       <Title />
       <AddTask addTask={addTask} setText={setText} text={text} />
-      <ListTasks tasks={tasks} setTasks={setTasks} className={className} setClassName={setClassName} />
-      <UndoToast className={className} setClassName={setClassName} />
+      <ListTasks tasks={tasks} setTasks={setTasks} className={className} setClassName={setClassName} setprevTask={setPrevTasks} setTimeOut={setTimeOut} />
+      <UndoToast setTasks={setTasks} className={className} setClassName={setClassName} prevTasks={prevTasks} timeOut={timeOut} />
     </div>
   )
 }

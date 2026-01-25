@@ -8,9 +8,11 @@ type LineTasksProps = {
   setTasks: React.Dispatch<React.SetStateAction<TasksListProps[]>>;
   className: string;
   setClassName: React.Dispatch<React.SetStateAction<string>>;
+  setprevTask: React.Dispatch<React.SetStateAction<TasksListProps[]>>;
+  setTimeOut: React.Dispatch<React.SetStateAction<any>>;
 }
 
-const LineTasks: React.FC<LineTasksProps> = ({ task, index, tasks, setTasks, className, setClassName }) => {
+const LineTasks: React.FC<LineTasksProps> = ({ task, index, tasks, setTasks, className, setClassName, setprevTask, setTimeOut }) => {
   const oldTaskText = useRef<string>('');
   const handleEdit: (id: string) => void = (id) => {
     oldTaskText.current = task.text;
@@ -43,15 +45,15 @@ const LineTasks: React.FC<LineTasksProps> = ({ task, index, tasks, setTasks, cla
   };
 
   const handleDelete: (id: string) => void = (id) => {
+    setprevTask(tasks);
     setTasks(tasks.map(task =>
       task.id === id ? { ...task, isDeleting: true } : task
     ));
 
     setClassName('entering');
-    setTimeout(() => {
+    setTimeOut(setTimeout(() => {
       setClassName('exiting');
-    }, 5000);
-
+    }, 5000));
 
     setTimeout(() => {
       setTasks(prev => prev.filter(task => task.id !== id));

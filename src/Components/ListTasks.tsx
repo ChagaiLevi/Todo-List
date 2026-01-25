@@ -6,9 +6,11 @@ type ListTasksProps = {
   setTasks: React.Dispatch<React.SetStateAction<TasksListProps[]>>;
   className: string;
   setClassName: React.Dispatch<React.SetStateAction<string>>;
+  setprevTask: React.Dispatch<React.SetStateAction<TasksListProps[]>>;
+  setTimeOut: React.Dispatch<React.SetStateAction<any>>;
 }
 
-const ListTasks: React.FC<ListTasksProps> = ({ tasks, setTasks, className, setClassName }) => {
+const ListTasks: React.FC<ListTasksProps> = ({ tasks, setTasks, className, setClassName, setprevTask, setTimeOut }) => {
   let index: number = 0.6; // For animation delay
 
   return (
@@ -16,7 +18,7 @@ const ListTasks: React.FC<ListTasksProps> = ({ tasks, setTasks, className, setCl
       {tasks.slice().reverse().map((task: TasksListProps) => {
         index += 0.2; // For animation delay
         return (
-          <LineTasks task={task} key={task.id} index={index} tasks={tasks} setTasks={setTasks} className={className} setClassName={setClassName} />
+          <LineTasks task={task} key={task.id} index={index} tasks={tasks} setTasks={setTasks} className={className} setClassName={setClassName} setprevTask={setprevTask} setTimeOut={setTimeOut} />
         )
       })}
       {tasks.length === 0 && (
