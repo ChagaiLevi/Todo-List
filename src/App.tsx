@@ -22,6 +22,8 @@ function App() {
   const [className, setClassName] = useState<string>('');
   const [prevTasks, setPrevTasks] = useState<TasksListProps[]>([]);
   const [timeOut, setTimeOut] = useState<any>(null);
+  const [messageText, setMessageText] = useState<string>('');
+
   const prevTasksRef = useRef(tasks);
 
   useEffect(() => {
@@ -43,7 +45,15 @@ function App() {
       isDeleting: false
     };
 
+    setPrevTasks(tasks.map(t => ({ ...t })));
     setTasks([...tasks, newTask]);
+
+    setMessageText('Task added');
+    setClassName('entering');
+    setTimeOut(setTimeout(() => {
+      setClassName('exiting');
+    }, 5000));
+
     setText('');
   }
 
@@ -51,8 +61,8 @@ function App() {
     <div className="container">
       <Title />
       <AddTask addTask={addTask} setText={setText} text={text} />
-      <ListTasks tasks={tasks} setTasks={setTasks} className={className} setClassName={setClassName} setprevTask={setPrevTasks} setTimeOut={setTimeOut} />
-      <UndoToast setTasks={setTasks} className={className} setClassName={setClassName} prevTasks={prevTasks} timeOut={timeOut} />
+      <ListTasks tasks={tasks} setTasks={setTasks} setClassName={setClassName} setprevTask={setPrevTasks} setTimeOut={setTimeOut} setMessageText={setMessageText} />
+      <UndoToast setTasks={setTasks} className={className} setClassName={setClassName} prevTasks={prevTasks} timeOut={timeOut} messageText={messageText} />
     </div>
   )
 }

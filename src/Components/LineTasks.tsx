@@ -6,16 +6,20 @@ type LineTasksProps = {
   index: number;
   tasks: TasksListProps[];
   setTasks: React.Dispatch<React.SetStateAction<TasksListProps[]>>;
-  className: string;
   setClassName: React.Dispatch<React.SetStateAction<string>>;
   setprevTask: React.Dispatch<React.SetStateAction<TasksListProps[]>>;
   setTimeOut: React.Dispatch<React.SetStateAction<any>>;
+  setMessageText: React.Dispatch<React.SetStateAction<string>>;
 }
 
-const LineTasks: React.FC<LineTasksProps> = ({ task, index, tasks, setTasks, className, setClassName, setprevTask, setTimeOut }) => {
+const LineTasks: React.FC<LineTasksProps> = ({ task, index, tasks, setTasks, setClassName, setprevTask, setTimeOut, setMessageText }) => {
   const oldTaskText = useRef<string>('');
   const handleEdit: (id: string) => void = (id) => {
     oldTaskText.current = task.text;
+
+    // snapshot a shallow clone of tasks (clone objects so later mutations don't modify the snapshot)
+    setprevTask(tasks.map(t => ({ ...t })));
+
     setTasks(tasks.map(task =>
       task.id === id ? { ...task, isEditing: true } : task
     ));
@@ -26,6 +30,15 @@ const LineTasks: React.FC<LineTasksProps> = ({ task, index, tasks, setTasks, cla
     const prevTrim: string = prev.trim();
     const newTrim: string = (newText || '').trim();
     const added: boolean = newTrim.length > prevTrim.length;
+
+    // snapshot already done in handleEdit, don't overwrite it here
+    if (prevTrim !== newTrim) {
+      setMessageText('Task edited');
+      setClassName('entering');
+      setTimeOut(setTimeout(() => {
+        setClassName('exiting');
+      }, 5000));
+    }
 
     setTasks(tasks.map(t =>
       t.id === id
@@ -45,11 +58,13 @@ const LineTasks: React.FC<LineTasksProps> = ({ task, index, tasks, setTasks, cla
   };
 
   const handleDelete: (id: string) => void = (id) => {
-    setprevTask(tasks);
+    // clone before starting delete animation so undo restores the real previous state
+    setprevTask(tasks.map(t => ({ ...t })));
     setTasks(tasks.map(task =>
       task.id === id ? { ...task, isDeleting: true } : task
     ));
 
+    setMessageText('Task deleted');
     setClassName('entering');
     setTimeOut(setTimeout(() => {
       setClassName('exiting');
@@ -88,7 +103,7 @@ const LineTasks: React.FC<LineTasksProps> = ({ task, index, tasks, setTasks, cla
           autoFocus
         />
       )
-        :/* if not */ (
+        : (
           <p className={`task-text ${task.completed ? 'completed' : ''}`}>{task.text}</p>
         )}
       <div className="actions">

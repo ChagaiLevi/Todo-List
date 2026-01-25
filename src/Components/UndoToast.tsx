@@ -6,9 +6,10 @@ type UndoToastProps = {
   setTasks: React.Dispatch<React.SetStateAction<TasksListProps[]>>;
   prevTasks: TasksListProps[];
   timeOut: any;
+  messageText: string;
 }
 
-const UndoToast: React.FC<UndoToastProps> = ({ className, setClassName, setTasks, prevTasks, timeOut }) => {
+const UndoToast: React.FC<UndoToastProps> = ({ className, setClassName, setTasks, prevTasks, timeOut, messageText }) => {
   const style: React.CSSProperties = {
     display: className ? 'flex' : 'none'
   };
@@ -24,7 +25,7 @@ const UndoToast: React.FC<UndoToastProps> = ({ className, setClassName, setTasks
         }
       }}
     >
-      <p className="notify-text">Task deleted</p>
+      <p className="notify-text">{messageText}</p>
       <button id="undo-btn" onClick={() => {
         if (!prevTasks) return;
         setTasks(prevTasks);
