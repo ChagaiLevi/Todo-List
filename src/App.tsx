@@ -50,37 +50,91 @@ function App() {
       isDeleting: false
     };
 
-    setTasks([...tasks, newTask]);
+    // setTasks([...tasks, newTask]);
 
-    let newMessage: numberMessagesProps = {
-      id: newTask.id,
-      text: 'Task added',
-      style: { opacity: 0, transform: 'translateY(-100px)', display: 'flex' },
-      timeOut: undefined,
-      prevTasks: tasks.map(t => ({ ...t }))
+    const add: () => void = () => {
+      setTasks([...tasks, newTask]);
     };
 
-    setNumberMessages(prev => [...prev, newMessage]);
+    message(add, newTask.id);
 
-    requestAnimationFrame(() => {
-      setNumberMessages(prev => prev.map(m =>
-        m.id === newMessage.id ? { ...m, style: { ...m.style, opacity: 1, transform: 'translateY(0) scale(1)' } } : m
-      ));
-    });
+    // let newMessage: numberMessagesProps = {
+    //   id: newTask.id,
+    //   text: 'Task added',
+    //   style: { opacity: 0, transform: 'translateY(-100px)', display: 'flex' },
+    //   timeOut: undefined,
+    //   prevTasks: tasks.map(t => ({ ...t }))
+    // };
 
-    setClassName('entering');
+    // setNumberMessages(prev => [...prev, newMessage]);
 
-    setNumberMessages(prev => prev.map(m =>
-      m.id === newMessage.id ? {
-        ...m,
-        timeOut: setTimeout(() => {
-          const el = document.querySelector(`[data-message-id="${newMessage.id}"]`) as HTMLElement | null;
-          startExit(newMessage.id, el);
-        }, 5000)
-      } : m
-    ));
+    // requestAnimationFrame(() => {
+    //   setNumberMessages(prev => prev.map(m =>
+    //     m.id === newMessage.id ? { ...m, style: { ...m.style, opacity: 1, transform: 'translateY(0) scale(1)' } } : m
+    //   ));
+    // });
+
+    // setClassName('entering');
+
+    // setNumberMessages(prev => prev.map(m =>
+    //   m.id === newMessage.id ? {
+    //     ...m,
+    //     timeOut: setTimeout(() => {
+    //       const el = document.querySelector(`[data-message-id="${newMessage.id}"]`) as HTMLElement | null;
+    //       startExit(newMessage.id, el);
+    //     }, 5000)
+    //   } : m
+    // ));
 
     setText('');
+  }
+
+  const message: (
+    action: () => void,
+    taskId: string,
+    prevTasksOverride?: TasksListProps[]
+  ) => void = (action, prevTasksOverride) => {
+    const prev: any = prevTasksOverride ?? prevTasksRef.current;
+
+    const msgId = uuidv4();
+
+    const newMessage: numberMessagesProps = {
+      id: msgId,
+      text: 'Task edited',
+      style: { opacity: 0, transform: 'translateY(-100px)', display: 'flex' },
+      timeOut: undefined,
+      prevTasks: prev,
+    };
+
+    setNumberMessages(prevArr => [...prevArr, newMessage]);
+
+    action();
+
+    requestAnimationFrame(() => {
+      setNumberMessages(prevArr =>
+        prevArr.map(m =>
+          m.id === msgId
+            ? { ...m, style: { ...m.style, opacity: 1, transform: 'translateY(0) scale(1)' } }
+            : m
+        )
+      );
+    });
+
+    setNumberMessages(prevArr =>
+      prevArr.map(m =>
+        m.id === msgId
+          ? {
+            ...m,
+            timeOut: setTimeout(() => {
+              const el = document.querySelector(
+                `[data-message-id="${msgId}"]`
+              ) as HTMLElement | null;
+              startExit(msgId, el);
+            }, 5000)
+          }
+          : m
+      )
+    );
   }
 
   const startExit = (messageId: string, el: any) => {
@@ -100,7 +154,7 @@ function App() {
     <div className="container">
       <Title />
       <AddTask addTask={addTask} setText={setText} text={text} />
-      <ListTasks tasks={tasks} setTasks={setTasks} setClassName={setClassName} setNumberMessages={setNumberMessages} startExit={startExit} />
+      <ListTasks tasks={tasks} setTasks={setTasks} setClassName={setClassName} setNumberMessages={setNumberMessages} startExit={startExit} message={message} />
       <UndoToast setTasks={setTasks} className={className} setClassName={setClassName} numberMessages={numberMessages} setNumberMessages={setNumberMessages} startExit={startExit} />
     </div>
   )

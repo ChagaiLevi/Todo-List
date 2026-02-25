@@ -10,11 +10,14 @@ type LineTasksProps = {
   setClassName: React.Dispatch<React.SetStateAction<string>>;
   setNumberMessages: React.Dispatch<React.SetStateAction<numberMessagesProps[]>>;
   startExit: (messageId: string, e: any) => void;
+  message: (action: () => void, id: string, prevTasksOverride?: TasksListProps[]) => void;
 };
 
-const LineTasks: React.FC<LineTasksProps> = ({ task, index, tasks, setTasks, setClassName, setNumberMessages, startExit }) => {
+const LineTasks: React.FC<LineTasksProps> = ({ task, index, tasks, setTasks, setClassName, setNumberMessages, startExit, message }) => {
   const oldTaskText = useRef<string>('');
   const prevTasksRef = useRef<TasksListProps[]>([]);
+
+  setClassName; setNumberMessages; startExit; // to avoid "declared but not used" lint errors
 
   const handleEdit: (id: string) => void = (id) => {
     oldTaskText.current = task.text;
@@ -30,37 +33,28 @@ const LineTasks: React.FC<LineTasksProps> = ({ task, index, tasks, setTasks, set
     const newTrim: string = (newText || '').trim();
     const added: boolean = newTrim.length > prevTrim.length;
 
-    let newMessage: numberMessagesProps = {
-      id: task.id,
-      text: 'Task edited',
-      style: { opacity: 0, transform: 'translateY(-100px)', display: 'flex' },
-      timeOut: undefined,
-      prevTasks: prevTasksRef.current
+    const edit: () => void = () => {
+      setTasks(tasks.map(t =>
+        t.id === id
+          ? {
+            ...t,
+            text: newText || t.text,
+            isEditing: false,
+            completed: (t.completed && added) ? false : t.completed
+          }
+          : t
+      ));
     };
 
-    setNumberMessages(prev => [...prev, newMessage]);
+    // if nothing actually changed, just persist the non‑editing state
+    if (newTrim === prevTrim) {
+      edit();
+      oldTaskText.current = newText || '';
+      return;               // do not create a message
+    }
 
-    setTasks(tasks.map(t =>
-      t.id === id
-        ? { ...t, text: newText || t.text, isEditing: false, completed: (t.completed && added) ? false : t.completed }
-        : t
-    ));
-
-    requestAnimationFrame(() => {
-      setNumberMessages(prev => prev.map(m =>
-        m.id === newMessage.id ? { ...m, style: { ...m.style, opacity: 1, transform: 'translateY(0) scale(1)' } } : m
-      ));
-    });
-
-    setNumberMessages(prev => prev.map(m =>
-      m.id === newMessage.id ? {
-        ...m,
-        timeOut: setTimeout(() => {
-          const el = document.querySelector(`[data-message-id="${newMessage.id}"]`) as HTMLElement | null;
-          startExit(newMessage.id, el);
-        }, 5000)
-      } : m
-    ));
+    // otherwise include the pre‑edit snapshot for undo
+    message(edit, id, prevTasksRef.current);
 
     oldTaskText.current = newText || '';
   };
@@ -74,37 +68,15 @@ const LineTasks: React.FC<LineTasksProps> = ({ task, index, tasks, setTasks, set
   };
 
   const handleDelete: (id: string) => void = (id) => {
-    setTasks(tasks.map(task =>
-      task.id === id ? { ...task, isDeleting: true } : task
-    ));
+    // setTasks(tasks.map(task =>
+    //   task.id === id ? { ...task, isDeleting: true } : task
+    // ));
 
-    let newMessage: numberMessagesProps = {
-      id: task.id,
-      text: 'Task deleted',
-      style: { opacity: 0, transform: 'translateY(-100px)', display: 'flex' },
-      timeOut: undefined,
-      prevTasks: tasks.map(t => ({ ...t }))
+    const deleted: () => void = () => {
+      setTasks(prev => prev.filter(task => task.id !== id));
     };
 
-    setNumberMessages(prev => [...prev, newMessage]);
-
-    requestAnimationFrame(() => {
-      setNumberMessages(prev => prev.map(m =>
-        m.id === newMessage.id ? { ...m, style: { ...m.style, opacity: 1, transform: 'translateY(0) scale(1)' } } : m
-      ));
-    });
-
-    setClassName('entering');
-
-    setNumberMessages(prev => prev.map(m =>
-      m.id === newMessage.id ? {
-        ...m,
-        timeOut: setTimeout(() => {
-          const el = document.querySelector(`[data-message-id="${newMessage.id}"]`) as HTMLElement | null;
-          startExit(newMessage.id, el);
-        }, 5000)
-      } : m
-    ));
+    message(deleted, id);
 
     setTimeout(() => {
       setTasks(prev => prev.filter(task => task.id !== id));

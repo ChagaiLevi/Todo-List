@@ -8,9 +8,10 @@ type ListTasksProps = {
   setClassName: React.Dispatch<React.SetStateAction<string>>;
   setNumberMessages: React.Dispatch<React.SetStateAction<numberMessagesProps[]>>;
   startExit: (messageId: string, e: any) => void;
+  message: (action: () => void, id: string) => void;
 }
 
-const ListTasks: React.FC<ListTasksProps> = ({ tasks, setTasks, setClassName, setNumberMessages, startExit }) => {
+const ListTasks: React.FC<ListTasksProps> = ({ tasks, setTasks, setClassName, setNumberMessages, startExit, message }) => {
   let index: number = 0.6; // For animation delay
 
   return (
@@ -18,7 +19,7 @@ const ListTasks: React.FC<ListTasksProps> = ({ tasks, setTasks, setClassName, se
       {tasks.slice().reverse().map((task: TasksListProps) => {
         index += 0.2; // For animation delay
         return (
-          <LineTasks task={task} key={task.id} index={index} tasks={tasks} setTasks={setTasks} setClassName={setClassName} setNumberMessages={setNumberMessages} startExit={startExit} />
+          <LineTasks task={task} key={task.id} index={index} tasks={tasks} setTasks={setTasks} setClassName={setClassName} setNumberMessages={setNumberMessages} startExit={startExit} message={message} />
         )
       })}
 
