@@ -46,14 +46,12 @@ const LineTasks: React.FC<LineTasksProps> = ({ task, index, tasks, setTasks, set
       ));
     };
 
-    // if nothing actually changed, just persist the non‑editing state
     if (newTrim === prevTrim) {
       edit();
       oldTaskText.current = newText || '';
-      return;               // do not create a message
+      return;
     }
 
-    // otherwise include the pre‑edit snapshot for undo
     message(edit, id, prevTasksRef.current);
 
     oldTaskText.current = newText || '';
@@ -68,10 +66,6 @@ const LineTasks: React.FC<LineTasksProps> = ({ task, index, tasks, setTasks, set
   };
 
   const handleDelete: (id: string) => void = (id) => {
-    // setTasks(tasks.map(task =>
-    //   task.id === id ? { ...task, isDeleting: true } : task
-    // ));
-
     const deleted: () => void = () => {
       setTasks(prev => prev.filter(task => task.id !== id));
     };

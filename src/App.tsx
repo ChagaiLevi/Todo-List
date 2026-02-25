@@ -50,41 +50,11 @@ function App() {
       isDeleting: false
     };
 
-    // setTasks([...tasks, newTask]);
-
     const add: () => void = () => {
       setTasks([...tasks, newTask]);
     };
 
     message(add, newTask.id);
-
-    // let newMessage: numberMessagesProps = {
-    //   id: newTask.id,
-    //   text: 'Task added',
-    //   style: { opacity: 0, transform: 'translateY(-100px)', display: 'flex' },
-    //   timeOut: undefined,
-    //   prevTasks: tasks.map(t => ({ ...t }))
-    // };
-
-    // setNumberMessages(prev => [...prev, newMessage]);
-
-    // requestAnimationFrame(() => {
-    //   setNumberMessages(prev => prev.map(m =>
-    //     m.id === newMessage.id ? { ...m, style: { ...m.style, opacity: 1, transform: 'translateY(0) scale(1)' } } : m
-    //   ));
-    // });
-
-    // setClassName('entering');
-
-    // setNumberMessages(prev => prev.map(m =>
-    //   m.id === newMessage.id ? {
-    //     ...m,
-    //     timeOut: setTimeout(() => {
-    //       const el = document.querySelector(`[data-message-id="${newMessage.id}"]`) as HTMLElement | null;
-    //       startExit(newMessage.id, el);
-    //     }, 5000)
-    //   } : m
-    // ));
 
     setText('');
   }
