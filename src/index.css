@@ -206,31 +206,29 @@ h1 {
   animation: fadeOut 0.5s ease-out forwards;
 }
 
-/* New styles for the notification */
-.notification {
+/* New styles for the notifications container */
+#notifications {
   position: fixed;
   bottom: 20px;
   left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 1000;
+}
+
+/* Styles for each notification */
+.notification {
   background: rgba(5, 5, 5, 0.95);
   padding: 1rem;
   border-radius: 12px;
   color: #00e7ff;
   box-shadow: 0 0 20px rgba(0, 231, 255, 0.5);
-  display: none;
   align-items: center;
   gap: 1rem;
   font-family: 'Orbitron', sans-serif;
   border: 1px solid rgba(0, 231, 255, 0.2);
-  z-index: 1000;
-}
-
-.notification.entering {
-  display: flex;
-  animation: enterAd 0.5s ease-out forwards;
-}
-
-.notification.exiting {
-  animation: exitAd 0.5s ease-out forwards;
+  transition: opacity 0.5s ease-out, transform 0.5s ease-out, max-height 0.5s ease-out, padding 0.5s ease-out;
 }
 
 .notify-text {
@@ -239,7 +237,7 @@ h1 {
   text-shadow: 0 0 15px rgba(0, 231, 255, 0.7);
 }
 
-#undo-btn {
+.undo-btn {
   padding: 8px 16px;
   border: none;
   border-radius: 8px;
@@ -252,7 +250,7 @@ h1 {
   box-shadow: 0 0 15px rgba(0, 231, 255, 0.7), 0 0 25px rgba(0, 231, 255, 0.4);
 }
 
-#undo-btn:hover {
+.undo-btn:hover {
   background: linear-gradient(45deg, #00b4d8, #0088a9);
   transform: scale(1.05);
   box-shadow: 0 0 20px rgba(0, 231, 255, 0.9), 0 0 35px rgba(0, 231, 255, 0.6);
@@ -335,29 +333,5 @@ h1 {
 
   100% {
     box-shadow: 0 0 15px rgba(0, 231, 255, 0.7), 0 0 25px rgba(0, 231, 255, 0.4);
-  }
-}
-
-@keyframes enterAd {
-  from {
-    opacity: 0;
-    transform: translateX(-100px) scale(0.8);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateX(0) scale(1);
-  }
-}
-
-@keyframes exitAd {
-  from {
-    opacity: 1;
-    transform: translateX(0) scale(1);
-  }
-
-  to {
-    opacity: 0;
-    transform: translateX(-100px) scale(0.8);
   }
 }

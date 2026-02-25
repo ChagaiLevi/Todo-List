@@ -1,5 +1,6 @@
 import LineTasks from './LineTasks';
 import { type TasksListProps } from '../App';
+import { type numberMessagesProps } from '../App';
 
 type ListTasksProps = {
   tasks: TasksListProps[];
@@ -8,9 +9,12 @@ type ListTasksProps = {
   setprevTask: React.Dispatch<React.SetStateAction<TasksListProps[]>>;
   setTimeOut: React.Dispatch<React.SetStateAction<any>>;
   setMessageText: React.Dispatch<React.SetStateAction<string>>;
+  numberMessages: numberMessagesProps[];
+  setNumberMessages: React.Dispatch<React.SetStateAction<numberMessagesProps[]>>;
+  startExit: (messageId: string, e: any) => void;
 }
 
-const ListTasks: React.FC<ListTasksProps> = ({ tasks, setTasks, setClassName, setprevTask, setTimeOut, setMessageText }) => {
+const ListTasks: React.FC<ListTasksProps> = ({ tasks, setTasks, setClassName, setprevTask, setTimeOut, setMessageText, numberMessages, setNumberMessages, startExit }) => {
   let index: number = 0.6; // For animation delay
 
   return (
@@ -18,7 +22,7 @@ const ListTasks: React.FC<ListTasksProps> = ({ tasks, setTasks, setClassName, se
       {tasks.slice().reverse().map((task: TasksListProps) => {
         index += 0.2; // For animation delay
         return (
-          <LineTasks task={task} key={task.id} index={index} tasks={tasks} setTasks={setTasks} setClassName={setClassName} setprevTask={setprevTask} setTimeOut={setTimeOut} setMessageText={setMessageText} />
+          <LineTasks task={task} key={task.id} index={index} tasks={tasks} setTasks={setTasks} setClassName={setClassName} setprevTask={setprevTask} setTimeOut={setTimeOut} setMessageText={setMessageText} numberMessages={numberMessages} setNumberMessages={setNumberMessages} startExit={startExit} />
         )
       })}
       {tasks.length === 0 && (
