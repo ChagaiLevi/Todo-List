@@ -8,22 +8,17 @@ type LineTasksProps = {
   tasks: TasksListProps[];
   setTasks: React.Dispatch<React.SetStateAction<TasksListProps[]>>;
   setClassName: React.Dispatch<React.SetStateAction<string>>;
-  setprevTask: React.Dispatch<React.SetStateAction<TasksListProps[]>>;
-  setTimeOut: React.Dispatch<React.SetStateAction<any>>;
-  setMessageText: React.Dispatch<React.SetStateAction<string>>;
-  numberMessages: numberMessagesProps[];
   setNumberMessages: React.Dispatch<React.SetStateAction<numberMessagesProps[]>>;
   startExit: (messageId: string, e: any) => void;
 };
 
-const LineTasks: React.FC<LineTasksProps> = ({ task, index, tasks, setTasks, setClassName, setprevTask, setTimeOut, setMessageText, numberMessages, setNumberMessages, startExit }) => {
+const LineTasks: React.FC<LineTasksProps> = ({ task, index, tasks, setTasks, setClassName, setNumberMessages, startExit }) => {
   const oldTaskText = useRef<string>('');
-  const prevTasksRef = useRef<TasksListProps[]>([]);        // ← store pre‑edit state
+  const prevTasksRef = useRef<TasksListProps[]>([]);
 
   const handleEdit: (id: string) => void = (id) => {
     oldTaskText.current = task.text;
-    prevTasksRef.current = tasks.map(t => ({ ...t }));       // snapshot here
-    setprevTask(tasks.map(t => ({ ...t })));
+    prevTasksRef.current = tasks.map(t => ({ ...t }));
     setTasks(tasks.map(task =>
       task.id === id ? { ...task, isEditing: true } : task
     ));
@@ -35,17 +30,14 @@ const LineTasks: React.FC<LineTasksProps> = ({ task, index, tasks, setTasks, set
     const newTrim: string = (newText || '').trim();
     const added: boolean = newTrim.length > prevTrim.length;
 
-    // clone before starting delete animation so undo restores the real previous state
-
     let newMessage: numberMessagesProps = {
       id: task.id,
       text: 'Task edited',
       style: { opacity: 0, transform: 'translateY(-100px)', display: 'flex' },
       timeOut: undefined,
-      prevTasks: prevTasksRef.current          // ← use the pre‑edit snapshot
+      prevTasks: prevTasksRef.current
     };
 
-    // append the message using functional update
     setNumberMessages(prev => [...prev, newMessage]);
 
     setTasks(tasks.map(t =>
@@ -54,17 +46,12 @@ const LineTasks: React.FC<LineTasksProps> = ({ task, index, tasks, setTasks, set
         : t
     ));
 
-    // animate in via state update (no direct mutation)
     requestAnimationFrame(() => {
       setNumberMessages(prev => prev.map(m =>
         m.id === newMessage.id ? { ...m, style: { ...m.style, opacity: 1, transform: 'translateY(0) scale(1)' } } : m
       ));
     });
 
-    // setMessageText('Task edited');
-    // setClassName('entering');
-
-    // set timeout for automatic exit — store timeout id on the message via functional update
     setNumberMessages(prev => prev.map(m =>
       m.id === newMessage.id ? {
         ...m,
@@ -74,22 +61,6 @@ const LineTasks: React.FC<LineTasksProps> = ({ task, index, tasks, setTasks, set
         }, 5000)
       } : m
     ));
-
-
-    // snapshot already done in handleEdit, don't overwrite it here
-    // if (prevTrim !== newTrim) {
-    //   setMessageText('Task edited');
-    //   setClassName('entering');
-    //   setTimeOut(setTimeout(() => {
-    //     setClassName('exiting');
-    //   }, 5000));
-    // }
-
-    // setTasks(tasks.map(t =>
-    //   t.id === id
-    //     ? { ...t, text: newText || t.text, isEditing: false, completed: (t.completed && added) ? false : t.completed }
-    //     : t
-    // ));
 
     oldTaskText.current = newText || '';
   };
@@ -103,8 +74,6 @@ const LineTasks: React.FC<LineTasksProps> = ({ task, index, tasks, setTasks, set
   };
 
   const handleDelete: (id: string) => void = (id) => {
-    // clone before starting delete animation so undo restores the real previous state
-    setprevTask(tasks.map(t => ({ ...t })));
     setTasks(tasks.map(task =>
       task.id === id ? { ...task, isDeleting: true } : task
     ));
@@ -117,20 +86,16 @@ const LineTasks: React.FC<LineTasksProps> = ({ task, index, tasks, setTasks, set
       prevTasks: tasks.map(t => ({ ...t }))
     };
 
-    // append the message using functional update
     setNumberMessages(prev => [...prev, newMessage]);
 
-    // animate in via state update (no direct mutation)
     requestAnimationFrame(() => {
       setNumberMessages(prev => prev.map(m =>
         m.id === newMessage.id ? { ...m, style: { ...m.style, opacity: 1, transform: 'translateY(0) scale(1)' } } : m
       ));
     });
 
-    setMessageText('Task deleted');
     setClassName('entering');
 
-    // set timeout for automatic exit — store timeout id on the message via functional update
     setNumberMessages(prev => prev.map(m =>
       m.id === newMessage.id ? {
         ...m,
@@ -141,7 +106,6 @@ const LineTasks: React.FC<LineTasksProps> = ({ task, index, tasks, setTasks, set
       } : m
     ));
 
-    // remove the task after short delay to allow delete animation
     setTimeout(() => {
       setTasks(prev => prev.filter(task => task.id !== id));
     }, 500);

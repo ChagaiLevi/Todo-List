@@ -18,7 +18,7 @@ export type numberMessagesProps = {
   text: string;
   style: React.CSSProperties;
   timeOut: any;
-  prevTasks?: TasksListProps[];   // <-- add this
+  prevTasks: TasksListProps[];
 }
 
 function App() {
@@ -28,11 +28,7 @@ function App() {
   });
   const [text, setText] = useState<string>('');
   const [className, setClassName] = useState<string>('');
-  const [prevTasks, setPrevTasks] = useState<TasksListProps[]>([]);
-  const [timeOut, setTimeOut] = useState<any>(null);
-  const [messageText, setMessageText] = useState<string>('');
   const [numberMessages, setNumberMessages] = useState<numberMessagesProps[]>([]);
-
   const prevTasksRef = useRef(tasks);
 
   useEffect(() => {
@@ -54,13 +50,6 @@ function App() {
       isDeleting: false
     };
 
-    // clone before starting delete animation so undo restores the real previous state
-    setPrevTasks(tasks.map(t => ({ ...t })));
-    // setTasks(tasks.map(task =>
-    //   task.id === id ? { ...task, isDeleting: true } : task
-    // ));
-
-    setPrevTasks(tasks.map(t => ({ ...t })));
     setTasks([...tasks, newTask]);
 
     let newMessage: numberMessagesProps = {
@@ -71,20 +60,16 @@ function App() {
       prevTasks: tasks.map(t => ({ ...t }))
     };
 
-    // append the message using functional update
     setNumberMessages(prev => [...prev, newMessage]);
 
-    // animate in via state update (no direct mutation)
     requestAnimationFrame(() => {
       setNumberMessages(prev => prev.map(m =>
         m.id === newMessage.id ? { ...m, style: { ...m.style, opacity: 1, transform: 'translateY(0) scale(1)' } } : m
       ));
     });
 
-    setMessageText('Task deleted');
     setClassName('entering');
 
-    // set timeout for automatic exit — store timeout id on the message via functional update
     setNumberMessages(prev => prev.map(m =>
       m.id === newMessage.id ? {
         ...m,
@@ -98,10 +83,9 @@ function App() {
     setText('');
   }
 
-  useEffect(() => { console.log(prevTasks); }, [prevTasks]);
-
   const startExit = (messageId: string, el: any) => {
     if (!el) return;
+
     setNumberMessages(prev => prev.map(m =>
       m.id === messageId ? { ...m, style: { ...m.style, maxHeight: `${el.offsetHeight}px` } } : m
     ));
@@ -116,8 +100,8 @@ function App() {
     <div className="container">
       <Title />
       <AddTask addTask={addTask} setText={setText} text={text} />
-      <ListTasks tasks={tasks} setTasks={setTasks} setClassName={setClassName} setprevTask={setPrevTasks} setTimeOut={setTimeOut} setMessageText={setMessageText} numberMessages={numberMessages} setNumberMessages={setNumberMessages} startExit={startExit} />
-      <UndoToast setTasks={setTasks} className={className} setClassName={setClassName} prevTasks={prevTasks} timeOut={timeOut} messageText={messageText} numberMessages={numberMessages} setNumberMessages={setNumberMessages} startExit={startExit} />
+      <ListTasks tasks={tasks} setTasks={setTasks} setClassName={setClassName} setNumberMessages={setNumberMessages} startExit={startExit} />
+      <UndoToast setTasks={setTasks} className={className} setClassName={setClassName} numberMessages={numberMessages} setNumberMessages={setNumberMessages} startExit={startExit} />
     </div>
   )
 }

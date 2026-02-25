@@ -5,15 +5,12 @@ type UndoToastProps = {
   className: string;
   setClassName: React.Dispatch<React.SetStateAction<string>>;
   setTasks: React.Dispatch<React.SetStateAction<TasksListProps[]>>;
-  prevTasks: TasksListProps[];
-  timeOut: any;
-  messageText: string;
   numberMessages: numberMessagesProps[];
   setNumberMessages: React.Dispatch<React.SetStateAction<numberMessagesProps[]>>;
   startExit: (messageId: string, e: any) => void;
 }
 
-const UndoToast: React.FC<UndoToastProps> = ({ className, setClassName, setTasks, prevTasks, timeOut, messageText, numberMessages, setNumberMessages, startExit }) => {
+const UndoToast: React.FC<UndoToastProps> = ({ className, setClassName, setTasks, numberMessages, setNumberMessages, startExit }) => {
   return (
     <div id="notifications">
       {numberMessages.map((message: numberMessagesProps) => {
