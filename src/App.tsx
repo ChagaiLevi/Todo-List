@@ -11,14 +11,17 @@ export type TasksListProps = {
   completed: boolean;
   isEditing: boolean;
   isDeleting: boolean;
+  isRestored?: boolean;        // flag used briefly when undo restores a task
 }
 
 export type numberMessagesProps = {
   id: string;
   text: string;
   style: React.CSSProperties;
-  timeOut: any;
+  timeOut: any;               // timeout used for fade-out animation
   prevTasks: TasksListProps[];
+  deleteTimeout?: any;        // optional timeout that actually removes a task after delete
+  didUndo?: boolean;          // internal flag marking message has been undone
 }
 
 function App() {
@@ -47,24 +50,29 @@ function App() {
       text,
       completed: false,
       isEditing: false,
-      isDeleting: false
+      isDeleting: false,
+      isRestored: false
     };
 
     const add: () => void = () => {
       setTasks([...tasks, newTask]);
     };
 
-    message(add, newTask.id);
+    const msgId = message(add, newTask.id);
+    // modify notification text for adding
+    setNumberMessages(prevArr =>
+      prevArr.map(m =>
+        m.id === msgId ? { ...m, text: 'Task added' } : m
+      )
+    );
 
     setText('');
   }
 
-  const message: (
-    action: () => void,
-    taskId: string,
-    prevTasksOverride?: TasksListProps[]
-  ) => void = (action, prevTasksOverride) => {
-    const prev: any = prevTasksOverride ?? prevTasksRef.current;
+  const message: (action: () => void, taskId: string, prevTasksOverride?: TasksListProps[]) => string = (action, _taskId, prevTasksOverride) => {
+    // clone the previous tasks array (and each task object) to avoid later mutations
+    const rawPrev: TasksListProps[] = prevTasksOverride ?? prevTasksRef.current;
+    const prev = rawPrev.map(t => ({ ...t }));
 
     const msgId = uuidv4();
 
@@ -105,6 +113,8 @@ function App() {
           : m
       )
     );
+
+    return msgId;
   }
 
   const startExit = (messageId: string, el: any) => {

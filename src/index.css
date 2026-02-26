@@ -40,7 +40,7 @@ h1 {
   padding: 0 2rem;
   opacity: 0;
   transform: translateY(20px);
-  animation: slideUp 1s ease-out 0.5s forwards;
+  animation: slideUp 0.8s ease-out 0.3s forwards;
 }
 
 #new-task {
@@ -100,12 +100,11 @@ h1 {
   background: rgba(255, 255, 255, 0.03);
   padding: 1rem;
   border-radius: 12px;
-  transition: all 0.3s ease;
+  /* transition only transform/opacity so our animation helper can animate position changes */
+  transition: transform 0.2s ease, opacity 0.3s ease;
   border: 1px solid rgba(0, 231, 255, 0.2);
   box-shadow: 0 0 12px rgba(0, 231, 255, 0.3);
-  opacity: 0;
-  transform: translateX(-20px);
-  animation: slideIn 0.8s ease-out forwards;
+  opacity: 1;
 }
 
 .task-text {
@@ -197,13 +196,15 @@ h1 {
   text-align: center;
   margin: 2rem 0;
   padding: 1rem;
-  opacity: 0;
-  transform: translateX(-20px);
-  animation: slideIn 0.8s ease-out 0.8s forwards;
+  /* make message immediately visible and fade in */
+  opacity: 1;
+  transform: none;
+  animation: fadeIn 0.5s ease-out;
 }
 
 .todo-item.deleting {
-  animation: fadeOut 0.5s ease-out forwards;
+  /* keep the fadeOut keyframe for explicit deletes; repositioning is handled by auto-animate */
+  animation: fadeOut 0.3s ease-out forwards;
 }
 
 /* New styles for the notifications container */
@@ -228,7 +229,7 @@ h1 {
   gap: 1rem;
   font-family: 'Orbitron', sans-serif;
   border: 1px solid rgba(0, 231, 255, 0.2);
-  transition: opacity 0.5s ease-out, transform 0.5s ease-out, max-height 0.5s ease-out, padding 0.5s ease-out;
+  transition: opacity 0.3s ease-out, transform 0.3s ease-out, max-height 0.3s ease-out, padding 0.3s ease-out;
 }
 
 .notify-text {
@@ -268,6 +269,43 @@ h1 {
   }
 }
 
+/* undo button animation */
+.notification.undoing {
+  animation: undoFlash 0.4s ease-out forwards;
+}
+
+@keyframes undoFlash {
+  0% {
+    transform: scale(1);
+    background: rgba(5, 5, 5, 0.95);
+  }
+
+  50% {
+    transform: scale(1.1);
+    background: rgba(0, 231, 255, 0.2);
+  }
+
+  100% {
+    transform: scale(1);
+    background: rgba(5, 5, 5, 0.95);
+  }
+}
+
+/* restored task highlight */
+.todo-item.restored {
+  animation: restoredHighlight 0.4s ease-out;
+}
+
+@keyframes restoredHighlight {
+  0% {
+    background: rgba(0, 231, 255, 0.1);
+  }
+
+  100% {
+    background: rgba(255, 255, 255, 0.03);
+  }
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -290,6 +328,7 @@ h1 {
   }
 }
 
+/* slideIn animation is no longer used for item entry because our auto-animate library provides smoother transitions
 @keyframes slideIn {
   from {
     opacity: 0;
@@ -301,6 +340,7 @@ h1 {
     transform: translateX(0);
   }
 }
+*/
 
 @keyframes typing {
   from {

@@ -4,20 +4,19 @@ import { type numberMessagesProps } from "../App";
 
 type LineTasksProps = {
   task: TasksListProps;
-  index: number;
   tasks: TasksListProps[];
   setTasks: React.Dispatch<React.SetStateAction<TasksListProps[]>>;
   setClassName: React.Dispatch<React.SetStateAction<string>>;
   setNumberMessages: React.Dispatch<React.SetStateAction<numberMessagesProps[]>>;
   startExit: (messageId: string, e: any) => void;
-  message: (action: () => void, id: string, prevTasksOverride?: TasksListProps[]) => void;
+  message: (action: () => void, id: string, prevTasksOverride?: TasksListProps[]) => string;
 };
 
-const LineTasks: React.FC<LineTasksProps> = ({ task, index, tasks, setTasks, setClassName, setNumberMessages, startExit, message }) => {
+const LineTasks: React.FC<LineTasksProps> = ({ task, tasks, setTasks, setClassName, setNumberMessages, startExit, message }) => {
   const oldTaskText = useRef<string>('');
   const prevTasksRef = useRef<TasksListProps[]>([]);
 
-  setClassName; setNumberMessages; startExit; // to avoid "declared but not used" lint errors
+  setClassName; setNumberMessages; startExit; // avoid unused lint issues
 
   const handleEdit: (id: string) => void = (id) => {
     oldTaskText.current = task.text;
@@ -66,25 +65,47 @@ const LineTasks: React.FC<LineTasksProps> = ({ task, index, tasks, setTasks, set
   };
 
   const handleDelete: (id: string) => void = (id) => {
-    const deleted: () => void = () => {
+    // take snapshot for undo
+    const snapshot = tasks.map(t => ({ ...t }));
+
+    // flag item as deleting so it fades before removal
+    setTasks(prev =>
+      prev.map(task =>
+        task.id === id ? { ...task, isDeleting: true } : task
+      )
+    );
+
+    const performDelete = () => {
       setTasks(prev => prev.filter(task => task.id !== id));
     };
 
-    message(deleted, id);
+    // message returns the id so we can later attach deleteTimeout
+    const msgId = message(performDelete, id, snapshot);
 
-    setTimeout(() => {
-      setTasks(prev => prev.filter(task => task.id !== id));
-    }, 500);
+    // update text for delete notification
+    setNumberMessages(prevArr =>
+      prevArr.map(m =>
+        m.id === msgId ? { ...m, text: 'Task deleted' } : m
+      )
+    );
+
+    const deleteTimeout = setTimeout(performDelete, 500);
+    setNumberMessages(prevArr =>
+      prevArr.map(m =>
+        m.id === msgId ? { ...m, deleteTimeout } : m
+      )
+    );
   };
 
-  const animationDelay = `${index * 0.1}s`;
   const animationStyle: React.CSSProperties = task.isDeleting
-    ? { animation: `fadeOut 0.5s ease-out forwards` }
-    : { animation: `slideIn 0.8s ease-out ${animationDelay} forwards` };
+    ? { opacity: 0 }
+    : {};
+
+  const restoredClass = task.isRestored ? 'restored' : '';
 
   return (
     <div
-      className={`todo-item ${task.isDeleting ? 'deleting' : ''}`}
+      className={`todo-item ${task.isDeleting ? 'deleting' : ''} ${restoredClass}`}
       key={task.id}
       style={animationStyle}
     >
