@@ -100,11 +100,70 @@ h1 {
   background: rgba(255, 255, 255, 0.03);
   padding: 1rem;
   border-radius: 12px;
-  /* transition only transform/opacity so our animation helper can animate position changes */
-  transition: transform 0.2s ease, opacity 0.3s ease;
+  /* transition only transform/opacity so our drag logic can animate position changes */
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   border: 1px solid rgba(0, 231, 255, 0.2);
   box-shadow: 0 0 12px rgba(0, 231, 255, 0.3);
   opacity: 1;
+}
+
+/* Drag handle */
+.drag-handle {
+  background: #000000;
+  border: 1px solid rgba(0, 231, 255, 0.3);
+  border-radius: 8px;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+  cursor: grab;
+  flex-shrink: 0;
+  padding: 6px;
+  margin-right: 1rem;
+  box-shadow: 0 0 12px rgba(0, 231, 255, 0.3);
+  transition: all 0.3s ease;
+  user-select: none;
+}
+
+.drag-handle:hover {
+  box-shadow: 0 0 20px rgba(0, 231, 255, 0.6);
+  transform: scale(1.05);
+}
+
+.drag-handle:active {
+  cursor: grabbing;
+  transform: scale(0.92);
+}
+
+.stripe {
+  width: 20px;
+  height: 2.5px;
+  background: #00e7ff;
+  border-radius: 2px;
+  box-shadow: 0 0 5px rgba(0, 231, 255, 0.8);
+}
+
+/* Item being dragged (follows mouse, fixed position) */
+.todo-item.dragging {
+  opacity: 0.45;
+  transform: scale(0.95);
+  box-shadow: 0 0 40px rgba(0, 231, 255, 0.9);
+  transition: none;
+  z-index: 1000;
+}
+
+/* Placeholder that slides smoothly to make room */
+.placeholder {
+  background: rgba(0, 231, 255, 0.08);
+  border: 2px dashed rgba(0, 231, 255, 0.6);
+  border-radius: 12px;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 0 15px rgba(0, 231, 255, 0.3);
 }
 
 .task-text {
@@ -196,18 +255,15 @@ h1 {
   text-align: center;
   margin: 2rem 0;
   padding: 1rem;
-  /* make message immediately visible and fade in */
   opacity: 1;
   transform: none;
   animation: fadeIn 0.5s ease-out;
 }
 
 .todo-item.deleting {
-  /* keep the fadeOut keyframe for explicit deletes; repositioning is handled by auto-animate */
   animation: fadeOut 0.3s ease-out forwards;
 }
 
-/* New styles for the notifications container */
 #notifications {
   position: fixed;
   bottom: 20px;
@@ -218,7 +274,6 @@ h1 {
   z-index: 1000;
 }
 
-/* Styles for each notification */
 .notification {
   background: rgba(5, 5, 5, 0.95);
   padding: 1rem;
@@ -269,7 +324,6 @@ h1 {
   }
 }
 
-/* undo button animation */
 .notification.undoing {
   animation: undoFlash 0.4s ease-out forwards;
 }
@@ -291,7 +345,6 @@ h1 {
   }
 }
 
-/* restored task highlight */
 .todo-item.restored {
   animation: restoredHighlight 0.4s ease-out;
 }
@@ -327,20 +380,6 @@ h1 {
     transform: translateY(0);
   }
 }
-
-/* slideIn animation is no longer used for item entry because our auto-animate library provides smoother transitions
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateX(-20px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-*/
 
 @keyframes typing {
   from {

@@ -11,17 +11,17 @@ export type TasksListProps = {
   completed: boolean;
   isEditing: boolean;
   isDeleting: boolean;
-  isRestored?: boolean;        // flag used briefly when undo restores a task
+  isRestored?: boolean;
 }
 
 export type numberMessagesProps = {
   id: string;
   text: string;
   style: React.CSSProperties;
-  timeOut: any;               // timeout used for fade-out animation
+  timeOut: any;
   prevTasks: TasksListProps[];
-  deleteTimeout?: any;        // optional timeout that actually removes a task after delete
-  didUndo?: boolean;          // internal flag marking message has been undone
+  deleteTimeout?: any;
+  didUndo?: boolean;
 }
 
 function App() {
@@ -38,7 +38,6 @@ function App() {
     if (prevTasksRef.current !== tasks) {
       localStorage.setItem('tasks', JSON.stringify(tasks));
     }
-
     prevTasksRef.current = tasks;
   }, [tasks]);
 
@@ -59,7 +58,6 @@ function App() {
     };
 
     const msgId = message(add, newTask.id);
-    // modify notification text for adding
     setNumberMessages(prevArr =>
       prevArr.map(m =>
         m.id === msgId ? { ...m, text: 'Task added' } : m
@@ -70,7 +68,6 @@ function App() {
   }
 
   const message: (action: () => void, taskId: string, prevTasksOverride?: TasksListProps[]) => string = (action, _taskId, prevTasksOverride) => {
-    // clone the previous tasks array (and each task object) to avoid later mutations
     const rawPrev: TasksListProps[] = prevTasksOverride ?? prevTasksRef.current;
     const prev = rawPrev.map(t => ({ ...t }));
 
@@ -131,12 +128,14 @@ function App() {
   };
 
   return (
-    <div className="container">
-      <Title />
-      <AddTask addTask={addTask} setText={setText} text={text} />
-      <ListTasks tasks={tasks} setTasks={setTasks} setClassName={setClassName} setNumberMessages={setNumberMessages} startExit={startExit} message={message} />
+    <>
+      <div className="container">
+        <Title />
+        <AddTask addTask={addTask} setText={setText} text={text} />
+        <ListTasks tasks={tasks} setTasks={setTasks} setClassName={setClassName} setNumberMessages={setNumberMessages} startExit={startExit} message={message} />
+      </div>
       <UndoToast setTasks={setTasks} className={className} setClassName={setClassName} numberMessages={numberMessages} setNumberMessages={setNumberMessages} startExit={startExit} />
-    </div>
+    </>
   )
 }
 
