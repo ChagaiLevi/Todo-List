@@ -6,93 +6,107 @@ type LineTasksProps = {
   task: TasksListProps;
   tasks: TasksListProps[];
   setTasks: React.Dispatch<React.SetStateAction<TasksListProps[]>>;
-  setClassName: React.Dispatch<React.SetStateAction<string>>;
   setNumberMessages: React.Dispatch<React.SetStateAction<numberMessagesProps[]>>;
-  startExit: (messageId: string, e: any) => void;
   message: (action: () => void, id: string, prevTasksOverride?: TasksListProps[]) => string;
-  onDragHandleMouseDown: (e: React.MouseEvent, itemEl: HTMLElement) => void;
+  onDragHandleMouseDown: (event: React.MouseEvent, itemEl: HTMLElement) => void;
+  onDetailsClick: (event: React.MouseEvent<HTMLButtonElement>) => void;
 };
 
 const LineTasks: React.FC<LineTasksProps> = ({
-  task, tasks, setTasks, setClassName, setNumberMessages, startExit, message,
+  task,
+  tasks,
+  setTasks,
+  setNumberMessages,
+  message,
   onDragHandleMouseDown,
+  onDetailsClick,
 }) => {
   const itemRef = useRef<HTMLDivElement>(null);
-  const oldTaskText = useRef<string>('');
+  const oldTaskText = useRef<string>("");
   const prevTasksRef = useRef<TasksListProps[]>([]);
-
-  setClassName; setNumberMessages; startExit; // suppress unused lint warnings
 
   const handleEdit = (id: string) => {
     oldTaskText.current = task.text;
-    prevTasksRef.current = tasks.map(t => ({ ...t }));
-    setTasks(tasks.map(t => t.id === id ? { ...t, isEditing: true } : t));
+    prevTasksRef.current = tasks.map((taskItem) => ({ ...taskItem }));
+    setTasks(tasks.map((taskItem) => (taskItem.id === id ? { ...taskItem, isEditing: true } : taskItem)));
   };
 
   const handleSave = (id: string, newText: string) => {
-    const prevTrim = (oldTaskText.current || '').trim();
-    const newTrim = (newText || '').trim();
+    const prevTrim = (oldTaskText.current || "").trim();
+    const newTrim = (newText || "").trim();
     const added = newTrim.length > prevTrim.length;
 
     const edit = () => {
-      setTasks(tasks.map(t =>
-        t.id === id
-          ? { ...t, text: newText || t.text, isEditing: false, completed: t.completed && added ? false : t.completed }
-          : t
-      ));
+      setTasks(
+        tasks.map((taskItem) =>
+          taskItem.id === id
+            ? {
+              ...taskItem,
+              text: newText || taskItem.text,
+              isEditing: false,
+              completed: taskItem.completed && added ? false : taskItem.completed,
+            }
+            : taskItem
+        )
+      );
     };
 
     if (newTrim === prevTrim) {
       edit();
-      oldTaskText.current = newText || '';
+      oldTaskText.current = newText || "";
       return;
     }
 
     message(edit, id, prevTasksRef.current);
-    oldTaskText.current = newText || '';
+    oldTaskText.current = newText || "";
   };
 
   const handleComplete = (id: string) => {
-    setTasks(tasks.map(t => t.id === id ? { ...t, completed: !t.completed, isEditing: false } : t));
+    setTasks(
+      tasks.map((taskItem) =>
+        taskItem.id === id ? { ...taskItem, completed: !taskItem.completed, isEditing: false } : taskItem
+      )
+    );
     oldTaskText.current = task.text;
   };
 
   const handleDelete = (id: string) => {
-    const snapshot = tasks.map(t => ({ ...t }));
+    const snapshot = tasks.map((taskItem) => ({ ...taskItem }));
 
-    setTasks(prev => prev.map(t => t.id === id ? { ...t, isDeleting: true } : t));
+    setTasks((prev) => prev.map((taskItem) => (taskItem.id === id ? { ...taskItem, isDeleting: true } : taskItem)));
 
-    const performDelete = () => setTasks(prev => prev.filter(t => t.id !== id));
+    const performDelete = () => setTasks((prev) => prev.filter((taskItem) => taskItem.id !== id));
 
     const msgId = message(performDelete, id, snapshot);
 
-    setNumberMessages(prevArr =>
-      prevArr.map(m => m.id === msgId ? { ...m, text: 'Task deleted' } : m)
+    setNumberMessages((prevArr) =>
+      prevArr.map((messageItem) => (messageItem.id === msgId ? { ...messageItem, text: "Task deleted" } : messageItem))
     );
 
     const deleteTimeout = setTimeout(performDelete, 500);
-    setNumberMessages(prevArr =>
-      prevArr.map(m => m.id === msgId ? { ...m, deleteTimeout } : m)
+    setNumberMessages((prevArr) =>
+      prevArr.map((messageItem) =>
+        messageItem.id === msgId ? { ...messageItem, deleteTimeout } : messageItem
+      )
     );
   };
 
   const animationStyle: React.CSSProperties = task.isDeleting ? { opacity: 0 } : {};
-  const restoredClass = task.isRestored ? 'restored' : '';
+  const restoredClass = task.isRestored ? "restored" : "";
 
   return (
     <div
       ref={itemRef}
-      className={`todo-item ${task.isDeleting ? 'deleting' : ''} ${restoredClass}`}
+      className={`todo-item ${task.isDeleting ? "deleting" : ""} ${restoredClass}`}
       data-task-id={task.id}
       style={animationStyle}
     >
-      {/* Drag handle — mirrors prototype exactly */}
       <button
         type="button"
         className="drag-handle"
         aria-label="Drag to reorder"
-        onMouseDown={e => {
-          if (itemRef.current) onDragHandleMouseDown(e, itemRef.current);
+        onMouseDown={(event) => {
+          if (itemRef.current) onDragHandleMouseDown(event, itemRef.current);
         }}
       >
         <span className="stripe" />
@@ -105,26 +119,31 @@ const LineTasks: React.FC<LineTasksProps> = ({
           type="text"
           className="task-input"
           value={task.text}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-            setTasks(tasks.map(t => t.id === task.id ? { ...t, text: e.target.value } : t))
+          onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+            setTasks(
+              tasks.map((taskItem) =>
+                taskItem.id === task.id ? { ...taskItem, text: event.target.value } : taskItem
+              )
+            )
           }
           onBlur={() => handleSave(task.id, task.text)}
-          onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
-            if (e.key === 'Enter') handleSave(task.id, task.text);
+          onKeyDown={(event: React.KeyboardEvent<HTMLInputElement>) => {
+            if (event.key === "Enter") handleSave(task.id, task.text);
           }}
           autoFocus
         />
       ) : (
-        <p className={`task-text ${task.completed ? 'completed' : ''}`}>{task.text}</p>
+        <p className={`task-text ${task.completed ? "completed" : ""}`}>{task.text}</p>
       )}
 
       <div className="actions">
         <button className="edit-btn" onClick={() => handleEdit(task.id)}>✎</button>
-        <button className="complete-btn" onClick={() => handleComplete(task.id)}>✔</button>
-        <button className="delete-btn" onClick={() => handleDelete(task.id)}>✖</button>
+        <button className="complete-btn" onClick={() => handleComplete(task.id)}>✓</button>
+        <button className="details-btn" onClick={onDetailsClick}>!</button>
+        <button className="delete-btn" onClick={() => handleDelete(task.id)}>✕</button>
       </div>
     </div>
   );
-}
+};
 
 export default LineTasks;

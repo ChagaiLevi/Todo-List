@@ -1,9 +1,9 @@
-import Title from "./Components/Title"
-import AddTask from "./Components/AddTask"
-import ListTasks from "./Components/ListTasks"
+import Title from "./Components/Title";
+import AddTask from "./Components/AddTask";
+import ListTasks from "./Components/ListTasks";
 import UndoToast from "./Components/UndoToast";
-import { useState, useEffect, useRef } from 'react';
-import { v4 as uuidv4 } from 'uuid';
+import { useState, useEffect, useRef, useCallback } from "react";
+import { v4 as uuidv4 } from "uuid";
 
 export type TasksListProps = {
   id: string;
@@ -12,36 +12,82 @@ export type TasksListProps = {
   isEditing: boolean;
   isDeleting: boolean;
   isRestored?: boolean;
-}
+  detailsDate: string;
+  detailsTime: string;
+};
 
 export type numberMessagesProps = {
   id: string;
   text: string;
   style: React.CSSProperties;
-  timeOut: any;
+  timeOut: ReturnType<typeof setTimeout> | undefined;
   prevTasks: TasksListProps[];
-  deleteTimeout?: any;
+  deleteTimeout?: ReturnType<typeof setTimeout>;
   didUndo?: boolean;
-}
+};
+
+type SavedTaskProps = Omit<TasksListProps, "detailsDate" | "detailsTime"> &
+  Partial<Pick<TasksListProps, "detailsDate" | "detailsTime">>;
+
+type DetailsPopupStateProps = {
+  isMounted: boolean;
+  isVisible: boolean;
+  left: number;
+  top: number;
+  detailsDate: string;
+  detailsTime: string;
+};
+
+const createTaskDetails = (date = new Date()) => ({
+  detailsDate: new Intl.DateTimeFormat("en-GB").format(date),
+  detailsTime: new Intl.DateTimeFormat("en-GB", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).format(date),
+});
 
 function App() {
   const [tasks, setTasks] = useState<TasksListProps[]>(() => {
-    const savedTasks = localStorage.getItem('tasks');
-    return savedTasks ? JSON.parse(savedTasks) : [];
+    const savedTasks = localStorage.getItem("tasks");
+    if (!savedTasks) return [];
+
+    const parsedTasks: SavedTaskProps[] = JSON.parse(savedTasks);
+
+    return parsedTasks.map((task) => {
+      const fallbackDetails = createTaskDetails();
+
+      return {
+        ...task,
+        detailsDate: task.detailsDate ?? fallbackDetails.detailsDate,
+        detailsTime: task.detailsTime ?? fallbackDetails.detailsTime,
+      };
+    });
   });
-  const [text, setText] = useState<string>('');
-  const [className, setClassName] = useState<string>('');
+  const [text, setText] = useState<string>("");
+  const [className, setClassName] = useState<string>("");
   const [numberMessages, setNumberMessages] = useState<numberMessagesProps[]>([]);
+  const [detailsPopup, setDetailsPopup] = useState<DetailsPopupStateProps>({
+    isMounted: false,
+    isVisible: false,
+    left: 0,
+    top: 0,
+    detailsDate: "",
+    detailsTime: "",
+  });
   const prevTasksRef = useRef(tasks);
+  const detailsPopupRef = useRef<HTMLDivElement>(null);
+  const activeDetailsTaskIdRef = useRef<string | null>(null);
+  const transitionInProgressRef = useRef(false);
 
   useEffect(() => {
     if (prevTasksRef.current !== tasks) {
-      localStorage.setItem('tasks', JSON.stringify(tasks));
+      localStorage.setItem("tasks", JSON.stringify(tasks));
     }
     prevTasksRef.current = tasks;
   }, [tasks]);
 
-  const addTask: () => void = () => {
+  const addTask = () => {
     if (!text.trim()) return;
 
     const newTask: TasksListProps = {
@@ -50,93 +96,258 @@ function App() {
       completed: false,
       isEditing: false,
       isDeleting: false,
-      isRestored: false
+      isRestored: false,
+      ...createTaskDetails(),
     };
 
-    const add: () => void = () => {
+    const add = () => {
       setTasks([...tasks, newTask]);
     };
 
     const msgId = message(add, newTask.id);
-    setNumberMessages(prevArr =>
-      prevArr.map(m =>
-        m.id === msgId ? { ...m, text: 'Task added' } : m
+    setNumberMessages((prevArr) =>
+      prevArr.map((messageItem) =>
+        messageItem.id === msgId ? { ...messageItem, text: "Task added" } : messageItem
       )
     );
 
-    setText('');
-  }
+    setText("");
+  };
 
-  const message: (action: () => void, taskId: string, prevTasksOverride?: TasksListProps[]) => string = (action, _taskId, prevTasksOverride) => {
+  const message = (
+    action: () => void,
+    _taskId: string,
+    prevTasksOverride?: TasksListProps[]
+  ) => {
     const rawPrev: TasksListProps[] = prevTasksOverride ?? prevTasksRef.current;
-    const prev = rawPrev.map(t => ({ ...t }));
+    const prev = rawPrev.map((task) => ({ ...task }));
 
     const msgId = uuidv4();
 
     const newMessage: numberMessagesProps = {
       id: msgId,
-      text: 'Task edited',
-      style: { opacity: 0, transform: 'translateY(-100px)', display: 'flex' },
+      text: "Task edited",
+      style: { opacity: 0, transform: "translateY(-100px)", display: "flex" },
       timeOut: undefined,
       prevTasks: prev,
     };
 
-    setNumberMessages(prevArr => [...prevArr, newMessage]);
+    setNumberMessages((prevArr) => [...prevArr, newMessage]);
 
     action();
 
     requestAnimationFrame(() => {
-      setNumberMessages(prevArr =>
-        prevArr.map(m =>
-          m.id === msgId
-            ? { ...m, style: { ...m.style, opacity: 1, transform: 'translateY(0) scale(1)' } }
-            : m
+      setNumberMessages((prevArr) =>
+        prevArr.map((messageItem) =>
+          messageItem.id === msgId
+            ? {
+                ...messageItem,
+                style: { ...messageItem.style, opacity: 1, transform: "translateY(0) scale(1)" },
+              }
+            : messageItem
         )
       );
     });
 
-    setNumberMessages(prevArr =>
-      prevArr.map(m =>
-        m.id === msgId
+    setNumberMessages((prevArr) =>
+      prevArr.map((messageItem) =>
+        messageItem.id === msgId
           ? {
-            ...m,
-            timeOut: setTimeout(() => {
-              const el = document.querySelector(
-                `[data-message-id="${msgId}"]`
-              ) as HTMLElement | null;
-              startExit(msgId, el);
-            }, 5000)
-          }
-          : m
+              ...messageItem,
+              timeOut: setTimeout(() => {
+                const element = document.querySelector(
+                  `[data-message-id="${msgId}"]`
+                ) as HTMLElement | null;
+                startExit(msgId, element);
+              }, 5000),
+            }
+          : messageItem
       )
     );
 
     return msgId;
-  }
+  };
 
-  const startExit = (messageId: string, el: any) => {
-    if (!el) return;
+  const startExit = (messageId: string, element: HTMLElement | null) => {
+    if (!element) return;
 
-    setNumberMessages(prev => prev.map(m =>
-      m.id === messageId ? { ...m, style: { ...m.style, maxHeight: `${el.offsetHeight}px` } } : m
-    ));
+    setNumberMessages((prev) =>
+      prev.map((messageItem) =>
+        messageItem.id === messageId
+          ? {
+              ...messageItem,
+              style: { ...messageItem.style, maxHeight: `${element.offsetHeight}px` },
+            }
+          : messageItem
+      )
+    );
+
     requestAnimationFrame(() => {
-      setNumberMessages(prev => prev.map(m =>
-        m.id === messageId ? { ...m, style: { ...m.style, maxHeight: '0px', padding: '0px', margin: '0px', transform: 'translateX(-100px) scale(0.8)' } } : m
-      ));
+      setNumberMessages((prev) =>
+        prev.map((messageItem) =>
+          messageItem.id === messageId
+            ? {
+                ...messageItem,
+                style: {
+                  ...messageItem.style,
+                  maxHeight: "0px",
+                  padding: "0px",
+                  margin: "0px",
+                  transform: "translateX(-100px) scale(0.8)",
+                },
+              }
+            : messageItem
+        )
+      );
     });
   };
+
+  const hideDetailsPopup = useCallback(() => {
+    if (!detailsPopup.isVisible) return;
+
+    transitionInProgressRef.current = true;
+    activeDetailsTaskIdRef.current = null;
+    setDetailsPopup((prev) => ({ ...prev, isVisible: false }));
+  }, [detailsPopup.isVisible]);
+
+  const handleDetailsClick = (task: TasksListProps, event: React.MouseEvent<HTMLButtonElement>) => {
+    const button = event.currentTarget;
+
+    event.stopPropagation();
+    event.nativeEvent.stopImmediatePropagation?.();
+
+    if (transitionInProgressRef.current) return;
+
+    if (detailsPopup.isVisible && activeDetailsTaskIdRef.current === task.id) {
+      hideDetailsPopup();
+      return;
+    }
+
+    setDetailsPopup((prev) => ({
+      ...prev,
+      isMounted: true,
+      isVisible: false,
+      detailsDate: task.detailsDate,
+      detailsTime: task.detailsTime,
+    }));
+
+    requestAnimationFrame(() => {
+      const popupElement = detailsPopupRef.current;
+      const buttonRect = button.getBoundingClientRect();
+      const itemRect = button.closest(".todo-item")?.getBoundingClientRect();
+
+      if (!popupElement || !itemRect) return;
+
+      const popupRect = popupElement.getBoundingClientRect();
+
+      let left = buttonRect.left + buttonRect.width / 2 - popupRect.width / 2;
+      let top = itemRect.top - popupRect.height - 10;
+
+      if (left < 10) left = 10;
+      if (left + popupRect.width > window.innerWidth - 10) {
+        left = window.innerWidth - popupRect.width - 10;
+      }
+      if (top < 10) top = 10;
+
+      setDetailsPopup({
+        isMounted: true,
+        isVisible: true,
+        left,
+        top,
+        detailsDate: task.detailsDate,
+        detailsTime: task.detailsTime,
+      });
+      activeDetailsTaskIdRef.current = task.id;
+      transitionInProgressRef.current = true;
+    });
+  };
+
+  useEffect(() => {
+    const handleDocumentClick = (event: MouseEvent) => {
+      const target = event.target as Node;
+
+      if (
+        detailsPopup.isVisible &&
+        !detailsPopupRef.current?.contains(target) &&
+        !Array.from(document.querySelectorAll(".details-btn")).some((button) => button.contains(target))
+      ) {
+        hideDetailsPopup();
+      }
+    };
+
+    document.addEventListener("click", handleDocumentClick);
+
+    return () => {
+      document.removeEventListener("click", handleDocumentClick);
+    };
+  }, [detailsPopup.isVisible, hideDetailsPopup]);
 
   return (
     <>
       <div className="container">
         <Title />
         <AddTask addTask={addTask} setText={setText} text={text} />
-        <ListTasks tasks={tasks} setTasks={setTasks} setClassName={setClassName} setNumberMessages={setNumberMessages} startExit={startExit} message={message} />
+        <ListTasks
+          tasks={tasks}
+          setTasks={setTasks}
+          setNumberMessages={setNumberMessages}
+          message={message}
+          onDetailsClick={handleDetailsClick}
+        />
+        {detailsPopup.isMounted && (
+          <div
+            ref={detailsPopupRef}
+            id="details-popup"
+            className={detailsPopup.isVisible ? "show" : ""}
+            style={{
+              display: "block",
+              position: "fixed",
+              zIndex: 2000,
+              left: `${detailsPopup.left}px`,
+              top: `${detailsPopup.top}px`,
+              background: "rgba(5, 5, 5, 0.95)",
+              backdropFilter: "blur(20px)",
+              padding: "12px 18px",
+              borderRadius: "10px",
+              color: "#00e7ff",
+              boxShadow: "0 0 25px rgba(0, 231, 255, 0.6)",
+              border: "1px solid rgba(0, 231, 255, 0.2)",
+              fontSize: "0.95rem",
+              textAlign: "center",
+              lineHeight: 1.35,
+              minWidth: "135px",
+              boxSizing: "border-box",
+            }}
+            onTransitionEnd={(event) => {
+              if (event.propertyName !== "opacity") return;
+
+              if (detailsPopup.isVisible) {
+                transitionInProgressRef.current = false;
+                return;
+              }
+
+              setDetailsPopup((prev) => ({ ...prev, isMounted: false }));
+              transitionInProgressRef.current = false;
+            }}
+          >
+            Details:
+            <br />
+            {detailsPopup.detailsDate}
+            <br />
+            {detailsPopup.detailsTime}
+          </div>
+        )}
       </div>
-      <UndoToast setTasks={setTasks} className={className} setClassName={setClassName} numberMessages={numberMessages} setNumberMessages={setNumberMessages} startExit={startExit} />
+      <UndoToast
+        setTasks={setTasks}
+        className={className}
+        setClassName={setClassName}
+        numberMessages={numberMessages}
+        setNumberMessages={setNumberMessages}
+        startExit={startExit}
+      />
     </>
-  )
+  );
 }
 
-export default App
+export default App;

@@ -219,7 +219,8 @@ h1 {
 
 .edit-btn,
 .complete-btn,
-.delete-btn {
+.delete-btn,
+.details-btn {
   border: none;
   background: linear-gradient(45deg, #00e7ff, #00b4d8);
   color: #fff;
@@ -241,7 +242,8 @@ h1 {
 
 .edit-btn:hover,
 .complete-btn:hover,
-.delete-btn:hover {
+.delete-btn:hover,
+.details-btn:hover {
   background: linear-gradient(45deg, #00b4d8, #0088a9);
   box-shadow: 0 0 20px rgba(0, 231, 255, 0.9), 0 0 35px rgba(0, 231, 255, 0.6);
   transform: scale(1.05);
@@ -413,4 +415,18 @@ h1 {
   100% {
     box-shadow: 0 0 15px rgba(0, 231, 255, 0.7), 0 0 25px rgba(0, 231, 255, 0.4);
   }
+}
+
+/* Details popup styles */
+#details-popup {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+  opacity: 0;
+  transform: scale(0.85) translateY(12px);
+  transition: opacity 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+    transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+#details-popup.show {
+  opacity: 1;
+  transform: scale(1) translateY(0);
 }

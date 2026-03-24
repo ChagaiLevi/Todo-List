@@ -7,7 +7,7 @@ type UndoToastProps = {
   setTasks: React.Dispatch<React.SetStateAction<TasksListProps[]>>;
   numberMessages: numberMessagesProps[];
   setNumberMessages: React.Dispatch<React.SetStateAction<numberMessagesProps[]>>;
-  startExit: (messageId: string, e: any) => void;
+  startExit: (messageId: string, e: HTMLElement | null) => void;
 }
 
 const UndoToast: React.FC<UndoToastProps> = ({ className, setClassName, setTasks, numberMessages, setNumberMessages, startExit }) => {
@@ -22,12 +22,12 @@ const UndoToast: React.FC<UndoToastProps> = ({ className, setClassName, setTasks
             className={`notification ${className} ${extra}`}
             style={message.style}
             onAnimationEnd={(e: React.AnimationEvent<HTMLDivElement>) => {
-              if ((e as any).animationName === 'exitAd') {
+              if (e.animationName === 'exitAd') {
                 setClassName('');
               }
             }}
             onTransitionEnd={(e) => {
-              if ((e as any).propertyName === 'max-height' && message.style?.maxHeight === '0px') {
+              if (e.propertyName === 'max-height' && message.style?.maxHeight === '0px') {
                 // if undo was requested, restore tasks now that toast is gone
                 if (message.didUndo && message.prevTasks) {
                   const restoredTasks = message.prevTasks.map(t => ({ ...t, isRestored: true }));
