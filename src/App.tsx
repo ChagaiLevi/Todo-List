@@ -24,10 +24,10 @@ export type numberMessagesProps = {
   prevTasks: TasksListProps[];
   deleteTimeout?: ReturnType<typeof setTimeout>;
   didUndo?: boolean;
+  isExiting?: boolean;
 };
 
-type SavedTaskProps = Omit<TasksListProps, "detailsDate" | "detailsTime"> &
-  Partial<Pick<TasksListProps, "detailsDate" | "detailsTime">>;
+type SavedTaskProps = Omit<TasksListProps, "detailsDate" | "detailsTime"> & Partial<Pick<TasksListProps, "detailsDate" | "detailsTime">>;
 
 type DetailsPopupStateProps = {
   isMounted: boolean;
@@ -38,6 +38,7 @@ type DetailsPopupStateProps = {
   detailsTime: string;
 };
 
+// Builds the date/time metadata that gets saved with each task.
 const createTaskDetails = (date = new Date()) => ({
   detailsDate: new Intl.DateTimeFormat("en-GB").format(date),
   detailsTime: new Intl.DateTimeFormat("en-GB", {
@@ -47,6 +48,10 @@ const createTaskDetails = (date = new Date()) => ({
   }).format(date),
 });
 
+const TOAST_LIFETIME_MS = 5000;
+const TOAST_EXIT_DURATION_MS = 300;
+
+// Coordinates the full todo app: task state, undo toasts, and the details popup.
 function App() {
   const [tasks, setTasks] = useState<TasksListProps[]>(() => {
     const savedTasks = localStorage.getItem("tasks");
@@ -65,7 +70,6 @@ function App() {
     });
   });
   const [text, setText] = useState<string>("");
-  const [className, setClassName] = useState<string>("");
   const [numberMessages, setNumberMessages] = useState<numberMessagesProps[]>([]);
   const [detailsPopup, setDetailsPopup] = useState<DetailsPopupStateProps>({
     isMounted: false,
@@ -76,10 +80,13 @@ function App() {
     detailsTime: "",
   });
   const prevTasksRef = useRef(tasks);
+  const numberMessagesRef = useRef(numberMessages);
+  const exitingMessageIdsRef = useRef<Set<string>>(new Set());
   const detailsPopupRef = useRef<HTMLDivElement>(null);
   const activeDetailsTaskIdRef = useRef<string | null>(null);
   const transitionInProgressRef = useRef(false);
 
+  // Saves tasks to localStorage whenever the list changes.
   useEffect(() => {
     if (prevTasksRef.current !== tasks) {
       localStorage.setItem("tasks", JSON.stringify(tasks));
@@ -87,6 +94,22 @@ function App() {
     prevTasksRef.current = tasks;
   }, [tasks]);
 
+  // Keeps a ref in sync so timeout callbacks can read the latest toast list.
+  useEffect(() => {
+    numberMessagesRef.current = numberMessages;
+  }, [numberMessages]);
+
+  // Clears any pending toast timers when the app unmounts.
+  useEffect(() => {
+    return () => {
+      numberMessagesRef.current.forEach((messageItem) => {
+        if (messageItem.timeOut) clearTimeout(messageItem.timeOut);
+        if (messageItem.deleteTimeout) clearTimeout(messageItem.deleteTimeout);
+      });
+    };
+  }, []);
+
+  // Creates a new task, adds it to the list, and shows a matching toast.
   const addTask = () => {
     if (!text.trim()) return;
 
@@ -114,6 +137,7 @@ function App() {
     setText("");
   };
 
+  // Runs a task action and creates an undoable toast that remembers the previous task list.
   const message = (
     action: () => void,
     _taskId: string,
@@ -123,12 +147,16 @@ function App() {
     const prev = rawPrev.map((task) => ({ ...task }));
 
     const msgId = uuidv4();
+    const autoCloseTimeout = setTimeout(() => {
+      const element = document.querySelector(`[data-message-id="${msgId}"]`) as HTMLElement | null;
+      startExit(msgId, element);
+    }, TOAST_LIFETIME_MS);
 
     const newMessage: numberMessagesProps = {
       id: msgId,
       text: "Task edited",
       style: { opacity: 0, transform: "translateY(-100px)", display: "flex" },
-      timeOut: undefined,
+      timeOut: autoCloseTimeout,
       prevTasks: prev,
     };
 
@@ -141,43 +169,41 @@ function App() {
         prevArr.map((messageItem) =>
           messageItem.id === msgId
             ? {
-                ...messageItem,
-                style: { ...messageItem.style, opacity: 1, transform: "translateY(0) scale(1)" },
-              }
+              ...messageItem,
+              style: { ...messageItem.style, opacity: 1, transform: "translateY(0) scale(1)" },
+            }
             : messageItem
         )
       );
     });
 
-    setNumberMessages((prevArr) =>
-      prevArr.map((messageItem) =>
-        messageItem.id === msgId
-          ? {
-              ...messageItem,
-              timeOut: setTimeout(() => {
-                const element = document.querySelector(
-                  `[data-message-id="${msgId}"]`
-                ) as HTMLElement | null;
-                startExit(msgId, element);
-              }, 5000),
-            }
-          : messageItem
-      )
-    );
-
     return msgId;
   };
 
+  // Animates a toast out, removes it, and restores tasks if the user clicked Undo.
   const startExit = (messageId: string, element: HTMLElement | null) => {
-    if (!element) return;
+    const messageItem = numberMessagesRef.current.find((item) => item.id === messageId);
+    if (!messageItem || messageItem.isExiting || exitingMessageIdsRef.current.has(messageId)) return;
+
+    exitingMessageIdsRef.current.add(messageId);
+
+    if (messageItem.timeOut) clearTimeout(messageItem.timeOut);
+    if (messageItem.deleteTimeout) clearTimeout(messageItem.deleteTimeout);
+
+    const measuredHeight = element?.offsetHeight ?? 0;
 
     setNumberMessages((prev) =>
       prev.map((messageItem) =>
         messageItem.id === messageId
           ? {
-              ...messageItem,
-              style: { ...messageItem.style, maxHeight: `${element.offsetHeight}px` },
-            }
+            ...messageItem,
+            isExiting: true,
+            style: {
+              ...messageItem.style,
+              overflow: "hidden",
+              maxHeight: measuredHeight ? `${measuredHeight}px` : "120px",
+            },
+          }
           : messageItem
       )
     );
@@ -187,21 +213,38 @@ function App() {
         prev.map((messageItem) =>
           messageItem.id === messageId
             ? {
-                ...messageItem,
-                style: {
-                  ...messageItem.style,
-                  maxHeight: "0px",
-                  padding: "0px",
-                  margin: "0px",
-                  transform: "translateX(-100px) scale(0.8)",
-                },
-              }
+              ...messageItem,
+              style: {
+                ...messageItem.style,
+                opacity: 0,
+                maxHeight: "0px",
+                padding: "0px",
+                margin: "0px",
+                transform: "translateX(-100px) scale(0.8)",
+              },
+            }
             : messageItem
         )
       );
     });
+
+    setTimeout(() => {
+      const exitingMessage = numberMessagesRef.current.find((item) => item.id === messageId);
+
+      if (exitingMessage?.didUndo && exitingMessage.prevTasks) {
+        const restoredTasks = exitingMessage.prevTasks.map((task) => ({ ...task, isRestored: true }));
+        setTasks(restoredTasks);
+        setTimeout(() => {
+          setTasks((prev) => prev.map((task) => ({ ...task, isRestored: false })));
+        }, 400);
+      }
+
+      setNumberMessages((prev) => prev.filter((messageItem) => messageItem.id !== messageId));
+      exitingMessageIdsRef.current.delete(messageId);
+    }, TOAST_EXIT_DURATION_MS);
   };
 
+  // Starts closing the details popup and resets which task is currently active.
   const hideDetailsPopup = useCallback(() => {
     if (!detailsPopup.isVisible) return;
 
@@ -210,6 +253,7 @@ function App() {
     setDetailsPopup((prev) => ({ ...prev, isVisible: false }));
   }, [detailsPopup.isVisible]);
 
+  // Opens the details popup near the clicked task button and fills it with that task's metadata.
   const handleDetailsClick = (task: TasksListProps, event: React.MouseEvent<HTMLButtonElement>) => {
     const button = event.currentTarget;
 
@@ -262,6 +306,7 @@ function App() {
     });
   };
 
+  // Closes the details popup when the user clicks anywhere outside it.
   useEffect(() => {
     const handleDocumentClick = (event: MouseEvent) => {
       const target = event.target as Node;
@@ -339,9 +384,6 @@ function App() {
         )}
       </div>
       <UndoToast
-        setTasks={setTasks}
-        className={className}
-        setClassName={setClassName}
         numberMessages={numberMessages}
         setNumberMessages={setNumberMessages}
         startExit={startExit}

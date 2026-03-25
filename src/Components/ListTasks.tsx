@@ -15,6 +15,7 @@ const SNAP_DURATION = 180;
 const SCROLL_ZONE = 80;
 const SCROLL_SPEED = 10;
 
+// Renders the task list and manages drag-and-drop reordering behavior.
 const ListTasks: React.FC<ListTasksProps> = ({
   tasks,
   setTasks,
@@ -32,6 +33,7 @@ const ListTasks: React.FC<ListTasksProps> = ({
   } | null>(null);
   const scrollRafRef = useRef<number | null>(null);
 
+  // Auto-scrolls the page while a dragged item is near the top or bottom of the viewport.
   const scrollLoop = useCallback(() => {
     const dragData = dragState.current;
     if (!dragData) return;
@@ -48,6 +50,7 @@ const ListTasks: React.FC<ListTasksProps> = ({
     scrollRafRef.current = requestAnimationFrame(scrollLoop);
   }, []);
 
+  // Stops the auto-scroll loop after dragging finishes.
   const stopScroll = useCallback(() => {
     if (scrollRafRef.current !== null) {
       cancelAnimationFrame(scrollRafRef.current);
@@ -55,6 +58,7 @@ const ListTasks: React.FC<ListTasksProps> = ({
     }
   }, []);
 
+  // Finds the task element the dragged item should be inserted before.
   const getDragAfterElement = (y: number): HTMLElement | null => {
     const list = listRef.current;
     if (!list) return null;
@@ -71,6 +75,7 @@ const ListTasks: React.FC<ListTasksProps> = ({
     ).element;
   };
 
+  // Moves the dragged task with the mouse and repositions the placeholder in the list.
   const onMouseMove = useCallback((event: MouseEvent) => {
     const dragData = dragState.current;
     if (!dragData) return;
@@ -90,6 +95,7 @@ const ListTasks: React.FC<ListTasksProps> = ({
     }
   }, []);
 
+  // Finishes a drag, snaps the item into place, and saves the new task order in state.
   const onMouseUp = useCallback(() => {
     const dragData = dragState.current;
     if (!dragData) return;
@@ -137,6 +143,7 @@ const ListTasks: React.FC<ListTasksProps> = ({
     }, SNAP_DURATION);
   }, [onMouseMove, stopScroll, setTasks]);
 
+  // Starts dragging when the handle is pressed and prepares the floating task element.
   const handleDragHandleMouseDown = useCallback(
     (event: React.MouseEvent, itemEl: HTMLElement) => {
       event.preventDefault();

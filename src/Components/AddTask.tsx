@@ -4,6 +4,7 @@ type addTaskProps = {
   text: string;
 }
 
+// Renders the input field and button used to create a new task.
 const AddTask: React.FC<addTaskProps> = ({ addTask, setText, text }) => {
   return (
     <div className="todo-input">

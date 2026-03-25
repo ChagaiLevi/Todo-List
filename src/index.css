@@ -1,3 +1,4 @@
+/* App-wide styling, task states, and animations for the todo interface. */
 body {
   background: #000000;
   min-height: 100vh;
@@ -279,6 +280,7 @@ h1 {
 .notification {
   background: rgba(5, 5, 5, 0.95);
   padding: 1rem;
+  margin: 0;
   border-radius: 12px;
   color: #00e7ff;
   box-shadow: 0 0 20px rgba(0, 231, 255, 0.5);
@@ -286,7 +288,8 @@ h1 {
   gap: 1rem;
   font-family: 'Orbitron', sans-serif;
   border: 1px solid rgba(0, 231, 255, 0.2);
-  transition: opacity 0.3s ease-out, transform 0.3s ease-out, max-height 0.3s ease-out, padding 0.3s ease-out;
+  overflow: hidden;
+  transition: opacity 0.3s ease-out, transform 0.3s ease-out, max-height 0.3s ease-out, padding 0.3s ease-out, margin 0.3s ease-out;
 }
 
 .notify-text {
@@ -314,6 +317,12 @@ h1 {
   box-shadow: 0 0 20px rgba(0, 231, 255, 0.9), 0 0 35px rgba(0, 231, 255, 0.6);
 }
 
+.undo-btn:disabled {
+  cursor: default;
+  opacity: 0.7;
+  transform: none;
+}
+
 @keyframes fadeOut {
   from {
     opacity: 1;
@@ -332,18 +341,18 @@ h1 {
 
 @keyframes undoFlash {
   0% {
-    transform: scale(1);
     background: rgba(5, 5, 5, 0.95);
+    box-shadow: 0 0 20px rgba(0, 231, 255, 0.5);
   }
 
   50% {
-    transform: scale(1.1);
     background: rgba(0, 231, 255, 0.2);
+    box-shadow: 0 0 28px rgba(0, 231, 255, 0.9);
   }
 
   100% {
-    transform: scale(1);
     background: rgba(5, 5, 5, 0.95);
+    box-shadow: 0 0 20px rgba(0, 231, 255, 0.5);
   }
 }
 

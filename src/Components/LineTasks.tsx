@@ -12,6 +12,7 @@ type LineTasksProps = {
   onDetailsClick: (event: React.MouseEvent<HTMLButtonElement>) => void;
 };
 
+// Displays one task row and handles editing, completing, deleting, and drag interactions for it.
 const LineTasks: React.FC<LineTasksProps> = ({
   task,
   tasks,
@@ -25,12 +26,14 @@ const LineTasks: React.FC<LineTasksProps> = ({
   const oldTaskText = useRef<string>("");
   const prevTasksRef = useRef<TasksListProps[]>([]);
 
+  // Switches this task into edit mode and remembers its previous text/state for undo.
   const handleEdit = (id: string) => {
     oldTaskText.current = task.text;
     prevTasksRef.current = tasks.map((taskItem) => ({ ...taskItem }));
     setTasks(tasks.map((taskItem) => (taskItem.id === id ? { ...taskItem, isEditing: true } : taskItem)));
   };
 
+  // Saves edited text, and creates an undo toast only when the text actually changed.
   const handleSave = (id: string, newText: string) => {
     const prevTrim = (oldTaskText.current || "").trim();
     const newTrim = (newText || "").trim();
@@ -61,6 +64,7 @@ const LineTasks: React.FC<LineTasksProps> = ({
     oldTaskText.current = newText || "";
   };
 
+  // Toggles whether this task is marked complete.
   const handleComplete = (id: string) => {
     setTasks(
       tasks.map((taskItem) =>
@@ -70,6 +74,7 @@ const LineTasks: React.FC<LineTasksProps> = ({
     oldTaskText.current = task.text;
   };
 
+  // Starts the delete animation, removes the task, and wires up Undo support.
   const handleDelete = (id: string) => {
     const snapshot = tasks.map((taskItem) => ({ ...taskItem }));
 
