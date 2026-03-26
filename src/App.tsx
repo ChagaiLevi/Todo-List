@@ -1,5 +1,6 @@
 import Title from "./Components/Title";
 import AddTask from "./Components/AddTask";
+import Filters from "./Components/Filters";
 import ListTasks from "./Components/ListTasks";
 import UndoToast from "./Components/UndoToast";
 import { useState, useEffect, useRef, useCallback } from "react";
@@ -12,6 +13,7 @@ export type TasksListProps = {
   isEditing: boolean;
   isDeleting: boolean;
   isRestored?: boolean;
+  createdAt: number;
   detailsDate: string;
   detailsTime: string;
 };
@@ -27,7 +29,11 @@ export type numberMessagesProps = {
   isExiting?: boolean;
 };
 
-type SavedTaskProps = Omit<TasksListProps, "detailsDate" | "detailsTime"> & Partial<Pick<TasksListProps, "detailsDate" | "detailsTime">>;
+type SavedTaskProps = Omit<TasksListProps, "createdAt" | "detailsDate" | "detailsTime"> & {
+  createdAt?: number | string;
+  detailsDate?: string;
+  detailsTime?: string;
+};
 
 type DetailsPopupStateProps = {
   isMounted: boolean;
@@ -40,6 +46,7 @@ type DetailsPopupStateProps = {
 
 // Builds the date/time metadata that gets saved with each task.
 const createTaskDetails = (date = new Date()) => ({
+  createdAt: date.getTime(),
   detailsDate: new Intl.DateTimeFormat("en-GB").format(date),
   detailsTime: new Intl.DateTimeFormat("en-GB", {
     hour: "2-digit",
@@ -47,6 +54,38 @@ const createTaskDetails = (date = new Date()) => ({
     hour12: false,
   }).format(date),
 });
+
+const parseLegacyTaskDate = (detailsDate?: string, detailsTime?: string) => {
+  if (!detailsDate) return null;
+
+  const [day, month, year] = detailsDate.split("/").map(Number);
+  const [hour = 0, minute = 0] = detailsTime?.split(":").map(Number) ?? [];
+
+  if (!day || !month || !year) return null;
+
+  const parsedDate = new Date(year, month - 1, day, hour, minute);
+  return Number.isNaN(parsedDate.getTime()) ? null : parsedDate;
+};
+
+const getSavedTaskDate = (task: SavedTaskProps) => {
+  if (typeof task.createdAt === "number" && Number.isFinite(task.createdAt)) {
+    return new Date(task.createdAt);
+  }
+
+  if (typeof task.createdAt === "string") {
+    const timestamp = Number(task.createdAt);
+    if (Number.isFinite(timestamp)) {
+      return new Date(timestamp);
+    }
+
+    const parsedDate = new Date(task.createdAt);
+    if (!Number.isNaN(parsedDate.getTime())) {
+      return parsedDate;
+    }
+  }
+
+  return parseLegacyTaskDate(task.detailsDate, task.detailsTime) ?? new Date();
+};
 
 const TOAST_LIFETIME_MS = 5000;
 const TOAST_EXIT_DURATION_MS = 300;
@@ -60,16 +99,16 @@ function App() {
     const parsedTasks: SavedTaskProps[] = JSON.parse(savedTasks);
 
     return parsedTasks.map((task) => {
-      const fallbackDetails = createTaskDetails();
+      const normalizedDate = getSavedTaskDate(task);
+      const normalizedDetails = createTaskDetails(normalizedDate);
 
       return {
         ...task,
-        detailsDate: task.detailsDate ?? fallbackDetails.detailsDate,
-        detailsTime: task.detailsTime ?? fallbackDetails.detailsTime,
+        ...normalizedDetails,
       };
     });
   });
-  const [text, setText] = useState<string>("");
+  const [text, setText] = useState<string>('');
   const [numberMessages, setNumberMessages] = useState<numberMessagesProps[]>([]);
   const [detailsPopup, setDetailsPopup] = useState<DetailsPopupStateProps>({
     isMounted: false,
@@ -79,6 +118,7 @@ function App() {
     detailsDate: "",
     detailsTime: "",
   });
+  const [sorting, setSorting] = useState<string>('customer');
   const prevTasksRef = useRef(tasks);
   const numberMessagesRef = useRef(numberMessages);
   const exitingMessageIdsRef = useRef<Set<string>>(new Set());
@@ -89,7 +129,7 @@ function App() {
   // Saves tasks to localStorage whenever the list changes.
   useEffect(() => {
     if (prevTasksRef.current !== tasks) {
-      localStorage.setItem("tasks", JSON.stringify(tasks));
+      localStorage.setItem('tasks', JSON.stringify(tasks));
     }
     prevTasksRef.current = tasks;
   }, [tasks]);
@@ -130,11 +170,11 @@ function App() {
     const msgId = message(add, newTask.id);
     setNumberMessages((prevArr) =>
       prevArr.map((messageItem) =>
-        messageItem.id === msgId ? { ...messageItem, text: "Task added" } : messageItem
+        messageItem.id === msgId ? { ...messageItem, text: 'Task added' } : messageItem
       )
     );
 
-    setText("");
+    setText('');
   };
 
   // Runs a task action and creates an undoable toast that remembers the previous task list.
@@ -148,14 +188,14 @@ function App() {
 
     const msgId = uuidv4();
     const autoCloseTimeout = setTimeout(() => {
-      const element = document.querySelector(`[data-message-id="${msgId}"]`) as HTMLElement | null;
+      const element = document.querySelector(`[data-message-id='${msgId}']`) as HTMLElement | null;
       startExit(msgId, element);
     }, TOAST_LIFETIME_MS);
 
     const newMessage: numberMessagesProps = {
       id: msgId,
-      text: "Task edited",
-      style: { opacity: 0, transform: "translateY(-100px)", display: "flex" },
+      text: 'Task edited',
+      style: { opacity: 0, transform: 'translateY(-100px)', display: 'flex' },
       timeOut: autoCloseTimeout,
       prevTasks: prev,
     };
@@ -170,7 +210,7 @@ function App() {
           messageItem.id === msgId
             ? {
               ...messageItem,
-              style: { ...messageItem.style, opacity: 1, transform: "translateY(0) scale(1)" },
+              style: { ...messageItem.style, opacity: 1, transform: 'translateY(0) scale(1)' },
             }
             : messageItem
         )
@@ -200,8 +240,8 @@ function App() {
             isExiting: true,
             style: {
               ...messageItem.style,
-              overflow: "hidden",
-              maxHeight: measuredHeight ? `${measuredHeight}px` : "120px",
+              overflow: 'hidden',
+              maxHeight: measuredHeight ? `${measuredHeight}px` : '120px',
             },
           }
           : messageItem
@@ -217,10 +257,10 @@ function App() {
               style: {
                 ...messageItem.style,
                 opacity: 0,
-                maxHeight: "0px",
-                padding: "0px",
-                margin: "0px",
-                transform: "translateX(-100px) scale(0.8)",
+                maxHeight: '0px',
+                padding: '0px',
+                margin: '0px',
+                transform: 'translateX(-100px) scale(0.8)',
               },
             }
             : messageItem
@@ -260,17 +300,18 @@ function App() {
     event.stopPropagation();
     event.nativeEvent.stopImmediatePropagation?.();
 
-    if (transitionInProgressRef.current) return;
-
     if (detailsPopup.isVisible && activeDetailsTaskIdRef.current === task.id) {
       hideDetailsPopup();
       return;
     }
 
+    transitionInProgressRef.current = true;
+    activeDetailsTaskIdRef.current = task.id;
+
     setDetailsPopup((prev) => ({
       ...prev,
       isMounted: true,
-      isVisible: false,
+      isVisible: prev.isMounted ? prev.isVisible : false,
       detailsDate: task.detailsDate,
       detailsTime: task.detailsTime,
     }));
@@ -278,9 +319,12 @@ function App() {
     requestAnimationFrame(() => {
       const popupElement = detailsPopupRef.current;
       const buttonRect = button.getBoundingClientRect();
-      const itemRect = button.closest(".todo-item")?.getBoundingClientRect();
+      const itemRect = button.closest('.todo-item')?.getBoundingClientRect();
 
-      if (!popupElement || !itemRect) return;
+      if (!popupElement || !itemRect) {
+        transitionInProgressRef.current = false;
+        return;
+      }
 
       const popupRect = popupElement.getBoundingClientRect();
 
@@ -293,16 +337,15 @@ function App() {
       }
       if (top < 10) top = 10;
 
-      setDetailsPopup({
+      setDetailsPopup((prev) => ({
+        ...prev,
         isMounted: true,
         isVisible: true,
         left,
         top,
         detailsDate: task.detailsDate,
         detailsTime: task.detailsTime,
-      });
-      activeDetailsTaskIdRef.current = task.id;
-      transitionInProgressRef.current = true;
+      }));
     });
   };
 
@@ -314,7 +357,7 @@ function App() {
       if (
         detailsPopup.isVisible &&
         !detailsPopupRef.current?.contains(target) &&
-        !Array.from(document.querySelectorAll(".details-btn")).some((button) => button.contains(target))
+        !Array.from(document.querySelectorAll('.details-btn')).some((button) => button.contains(target))
       ) {
         hideDetailsPopup();
       }
@@ -327,17 +370,21 @@ function App() {
     };
   }, [detailsPopup.isVisible, hideDetailsPopup]);
 
+
+  console.log(tasks);
   return (
     <>
       <div className="container">
         <Title />
         <AddTask addTask={addTask} setText={setText} text={text} />
+        <Filters setSorting={setSorting} sorting={sorting} />
         <ListTasks
           tasks={tasks}
           setTasks={setTasks}
           setNumberMessages={setNumberMessages}
           message={message}
           onDetailsClick={handleDetailsClick}
+          sorting={sorting}
         />
         {detailsPopup.isMounted && (
           <div

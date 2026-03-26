@@ -10,18 +10,11 @@ type LineTasksProps = {
   message: (action: () => void, id: string, prevTasksOverride?: TasksListProps[]) => string;
   onDragHandleMouseDown: (event: React.MouseEvent, itemEl: HTMLElement) => void;
   onDetailsClick: (event: React.MouseEvent<HTMLButtonElement>) => void;
+  storing: string;
 };
 
 // Displays one task row and handles editing, completing, deleting, and drag interactions for it.
-const LineTasks: React.FC<LineTasksProps> = ({
-  task,
-  tasks,
-  setTasks,
-  setNumberMessages,
-  message,
-  onDragHandleMouseDown,
-  onDetailsClick,
-}) => {
+const LineTasks: React.FC<LineTasksProps> = ({ task, tasks, setTasks, setNumberMessages, message, onDragHandleMouseDown, onDetailsClick, storing, }) => {
   const itemRef = useRef<HTMLDivElement>(null);
   const oldTaskText = useRef<string>("");
   const prevTasksRef = useRef<TasksListProps[]>([]);
@@ -106,18 +99,19 @@ const LineTasks: React.FC<LineTasksProps> = ({
       data-task-id={task.id}
       style={animationStyle}
     >
-      <button
-        type="button"
-        className="drag-handle"
-        aria-label="Drag to reorder"
-        onMouseDown={(event) => {
-          if (itemRef.current) onDragHandleMouseDown(event, itemRef.current);
-        }}
-      >
-        <span className="stripe" />
-        <span className="stripe" />
-        <span className="stripe" />
-      </button>
+      {storing === 'customer' &&
+        <button
+          type="button"
+          className="drag-handle"
+          aria-label="Drag to reorder"
+          onMouseDown={(event) => {
+            if (itemRef.current) onDragHandleMouseDown(event, itemRef.current);
+          }}
+        >
+          <span className="stripe" />
+          <span className="stripe" />
+          <span className="stripe" />
+        </button>}
 
       {task.isEditing ? (
         <input

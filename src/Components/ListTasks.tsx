@@ -9,6 +9,7 @@ type ListTasksProps = {
   setNumberMessages: React.Dispatch<React.SetStateAction<numberMessagesProps[]>>;
   message: (action: () => void, id: string, prevTasksOverride?: TasksListProps[]) => string;
   onDetailsClick: (task: TasksListProps, event: React.MouseEvent<HTMLButtonElement>) => void;
+  sorting: string;
 };
 
 const SNAP_DURATION = 180;
@@ -16,13 +17,8 @@ const SCROLL_ZONE = 80;
 const SCROLL_SPEED = 10;
 
 // Renders the task list and manages drag-and-drop reordering behavior.
-const ListTasks: React.FC<ListTasksProps> = ({
-  tasks,
-  setTasks,
-  setNumberMessages,
-  message,
-  onDetailsClick,
-}) => {
+const ListTasks: React.FC<ListTasksProps> = ({ tasks, setTasks, setNumberMessages, message, onDetailsClick, sorting }) => {
+
   const listRef = useRef<HTMLDivElement>(null);
   const dragState = useRef<{
     item: HTMLElement;
@@ -181,7 +177,24 @@ const ListTasks: React.FC<ListTasksProps> = ({
     [onMouseMove, onMouseUp, scrollLoop]
   );
 
-  const displayedTasks = tasks.slice().reverse();
+  let displayedTasks = tasks;
+
+  if (sorting === 'customer') {
+    displayedTasks = tasks.slice().reverse();
+  }
+  else if (sorting === 'A-Z') {
+    displayedTasks = tasks.slice().sort((a, b) => a.text.localeCompare(b.text));
+  }
+  else if (sorting === 'Z-A') {
+    displayedTasks = tasks.slice().sort((a, b) => b.text.localeCompare(a.text));
+  }
+  else if (sorting === "date" || sorting === "date-reverse") {
+    displayedTasks = tasks.slice().sort((a, b) => {
+      return sorting === "date"
+        ? a.createdAt - b.createdAt
+        : b.createdAt - a.createdAt;
+    });
+  }
 
   return (
     <>
@@ -196,6 +209,7 @@ const ListTasks: React.FC<ListTasksProps> = ({
             message={message}
             onDragHandleMouseDown={handleDragHandleMouseDown}
             onDetailsClick={(event) => onDetailsClick(task, event)}
+            storing={sorting}
           />
         ))}
       </div>

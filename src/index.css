@@ -439,3 +439,77 @@ h1 {
   opacity: 1;
   transform: scale(1) translateY(0);
 }
+
+/* New filters section (sorting select + search input + search button) - placed under the add-input and above the task list */
+.todo-filters {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  padding: 0 2rem;
+  opacity: 0;
+  transform: translateY(20px);
+  animation: slideUp 1s ease-out 0.7s forwards;
+}
+
+.filter-select {
+  padding: 15px;
+  border: none;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  color: #00e7ff;
+  font-size: 1.1rem;
+  font-family: 'Orbitron', sans-serif;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 12px rgba(0, 231, 255, 0.4);
+  min-width: 240px;
+  cursor: pointer;
+}
+
+.filter-input {
+  flex: 1;
+  padding: 15px;
+  border: none;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  color: #00e7ff;
+  font-size: 1.1rem;
+  font-family: 'Orbitron', sans-serif;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 12px rgba(0, 231, 255, 0.4);
+}
+
+.filter-select:focus,
+.filter-input:focus {
+  outline: none;
+  box-shadow: 0 0 20px rgba(0, 231, 255, 0.8);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.filter-input::placeholder {
+  color: rgba(0, 231, 255, 0.4);
+}
+
+.filter-select option {
+  background: #111111;
+  color: #00e7ff;
+}
+
+/* New search button (identical styling to #add-btn) */
+#search-btn {
+  padding: 15px 30px;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(45deg, #00e7ff, #00b4d8);
+  color: #fff;
+  font-weight: 700;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 20px rgba(0, 231, 255, 0.7), 0 0 30px rgba(0, 231, 255, 0.5);
+}
+
+#search-btn:hover {
+  background: linear-gradient(45deg, #00b4d8, #0088a9);
+  transform: scale(1.05);
+  box-shadow: 0 0 25px rgba(0, 231, 255, 0.9), 0 0 40px rgba(0, 231, 255, 0.6);
+}
