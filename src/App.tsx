@@ -119,6 +119,7 @@ function App() {
     detailsTime: "",
   });
   const [sorting, setSorting] = useState<string>('customer');
+  const [search, setSearch] = useState<string>('');
   const prevTasksRef = useRef(tasks);
   const numberMessagesRef = useRef(numberMessages);
   const exitingMessageIdsRef = useRef<Set<string>>(new Set());
@@ -377,7 +378,7 @@ function App() {
       <div className="container">
         <Title />
         <AddTask addTask={addTask} setText={setText} text={text} />
-        <Filters setSorting={setSorting} sorting={sorting} />
+        <Filters setSorting={setSorting} sorting={sorting} search={search} setSearch={setSearch} tasks={tasks} setTasks={setTasks} />
         <ListTasks
           tasks={tasks}
           setTasks={setTasks}
