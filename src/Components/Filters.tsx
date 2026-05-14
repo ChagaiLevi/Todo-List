@@ -1,21 +1,12 @@
 import Fuse from "fuse.js";
-import { type TasksListProps } from "../App";
-
-type FiltersProps = {
-  setSorting: React.Dispatch<React.SetStateAction<string>>;
-  sorting: string;
-  search: string;
-  setSearch: React.Dispatch<React.SetStateAction<string>>;
-  tasks: TasksListProps[];
-  setTasks: React.Dispatch<React.SetStateAction<TasksListProps[]>>;
-}
+import { type FiltersProps } from "../scripts/types.ts";
 
 const Filters: React.FC<FiltersProps> = ({ setSorting, sorting, search, setSearch, tasks, setTasks }) => {
   const fuse = new Fuse(tasks, {
     keys: ["text"],
     includeScore: true,
-    includeMatches: true, // חשוב ל-highlight
-    threshold: 0.4, // כמה "רחוק" מותר
+    includeMatches: true,
+    threshold: 0.4,
   });
 
   console.log("Fuse instance:", fuse);
@@ -39,12 +30,10 @@ const Filters: React.FC<FiltersProps> = ({ setSorting, sorting, search, setSearc
     const parts = [];
 
     matches.forEach(([start, end], i) => {
-      // טקסט רגיל
       if (lastIndex < start) {
         parts.push(text.slice(lastIndex, start));
       }
 
-      // טקסט מודגש
       parts.push(
         <span key={i} style={{ backgroundColor: "yellow" }}>
           {text.slice(start, end + 1)}
@@ -54,7 +43,6 @@ const Filters: React.FC<FiltersProps> = ({ setSorting, sorting, search, setSearc
       lastIndex = end + 1;
     });
 
-    // שאר הטקסט
     if (lastIndex < text.length) {
       parts.push(text.slice(lastIndex));
     }

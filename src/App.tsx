@@ -3,89 +3,18 @@ import AddTask from "./Components/AddTask";
 import Filters from "./Components/Filters";
 import ListTasks from "./Components/ListTasks";
 import UndoToast from "./Components/UndoToast";
+
+import { type TasksListProps } from "./scripts/types.ts";
+import { type numberMessagesProps } from "./scripts/types.ts";
+import { type SavedTaskProps } from "./scripts/types.ts";
+import { type DetailsPopupStateProps } from "./scripts/types.ts";
+
+import { createTaskDetails } from './scripts/tasksFucntion.ts';
+import { getSavedTaskDate } from './scripts/tasksFucntion.ts';
+
 import { useState, useEffect, useRef, useCallback } from "react";
 import { v4 as uuidv4 } from "uuid";
 
-export type TasksListProps = {
-  id: string;
-  text: string;
-  completed: boolean;
-  isEditing: boolean;
-  isDeleting: boolean;
-  isRestored?: boolean;
-  createdAt: number;
-  detailsDate: string;
-  detailsTime: string;
-};
-
-export type numberMessagesProps = {
-  id: string;
-  text: string;
-  style: React.CSSProperties;
-  timeOut: ReturnType<typeof setTimeout> | undefined;
-  prevTasks: TasksListProps[];
-  deleteTimeout?: ReturnType<typeof setTimeout>;
-  didUndo?: boolean;
-  isExiting?: boolean;
-};
-
-type SavedTaskProps = Omit<TasksListProps, "createdAt" | "detailsDate" | "detailsTime"> & {
-  createdAt?: number | string;
-  detailsDate?: string;
-  detailsTime?: string;
-};
-
-type DetailsPopupStateProps = {
-  isMounted: boolean;
-  isVisible: boolean;
-  left: number;
-  top: number;
-  detailsDate: string;
-  detailsTime: string;
-};
-
-// Builds the date/time metadata that gets saved with each task.
-const createTaskDetails = (date = new Date()) => ({
-  createdAt: date.getTime(),
-  detailsDate: new Intl.DateTimeFormat("en-GB").format(date),
-  detailsTime: new Intl.DateTimeFormat("en-GB", {
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-  }).format(date),
-});
-
-const parseLegacyTaskDate = (detailsDate?: string, detailsTime?: string) => {
-  if (!detailsDate) return null;
-
-  const [day, month, year] = detailsDate.split("/").map(Number);
-  const [hour = 0, minute = 0] = detailsTime?.split(":").map(Number) ?? [];
-
-  if (!day || !month || !year) return null;
-
-  const parsedDate = new Date(year, month - 1, day, hour, minute);
-  return Number.isNaN(parsedDate.getTime()) ? null : parsedDate;
-};
-
-const getSavedTaskDate = (task: SavedTaskProps) => {
-  if (typeof task.createdAt === "number" && Number.isFinite(task.createdAt)) {
-    return new Date(task.createdAt);
-  }
-
-  if (typeof task.createdAt === "string") {
-    const timestamp = Number(task.createdAt);
-    if (Number.isFinite(timestamp)) {
-      return new Date(timestamp);
-    }
-
-    const parsedDate = new Date(task.createdAt);
-    if (!Number.isNaN(parsedDate.getTime())) {
-      return parsedDate;
-    }
-  }
-
-  return parseLegacyTaskDate(task.detailsDate, task.detailsTime) ?? new Date();
-};
 
 const TOAST_LIFETIME_MS = 5000;
 const TOAST_EXIT_DURATION_MS = 300;

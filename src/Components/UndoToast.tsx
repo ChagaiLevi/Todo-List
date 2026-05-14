@@ -1,10 +1,5 @@
-import { type numberMessagesProps } from "../App";
-
-type UndoToastProps = {
-  numberMessages: numberMessagesProps[];
-  setNumberMessages: React.Dispatch<React.SetStateAction<numberMessagesProps[]>>;
-  startExit: (messageId: string, e: HTMLElement | null) => void;
-}
+import { type numberMessagesProps } from "../scripts/types.ts";
+import { type UndoToastProps } from "../scripts/types.ts";
 
 // Shows toast notifications and lets the user undo the last task action.
 const UndoToast: React.FC<UndoToastProps> = ({ numberMessages, setNumberMessages, startExit }) => {

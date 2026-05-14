@@ -1,17 +1,6 @@
 import { useRef } from "react";
-import { type TasksListProps } from "../App";
-import { type numberMessagesProps } from "../App";
-
-type LineTasksProps = {
-  task: TasksListProps;
-  tasks: TasksListProps[];
-  setTasks: React.Dispatch<React.SetStateAction<TasksListProps[]>>;
-  setNumberMessages: React.Dispatch<React.SetStateAction<numberMessagesProps[]>>;
-  message: (action: () => void, id: string, prevTasksOverride?: TasksListProps[]) => string;
-  onDragHandleMouseDown: (event: React.MouseEvent, itemEl: HTMLElement) => void;
-  onDetailsClick: (event: React.MouseEvent<HTMLButtonElement>) => void;
-  storing: string;
-};
+import { type TasksListProps } from "../scripts/types.ts";
+import { type LineTasksProps } from "../scripts/types.ts";
 
 // Displays one task row and handles editing, completing, deleting, and drag interactions for it.
 const LineTasks: React.FC<LineTasksProps> = ({ task, tasks, setTasks, setNumberMessages, message, onDragHandleMouseDown, onDetailsClick, storing, }) => {

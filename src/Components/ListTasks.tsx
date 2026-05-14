@@ -1,16 +1,6 @@
 import { useRef, useCallback } from "react";
 import LineTasks from "./LineTasks";
-import { type TasksListProps } from "../App";
-import { type numberMessagesProps } from "../App";
-
-type ListTasksProps = {
-  tasks: TasksListProps[];
-  setTasks: React.Dispatch<React.SetStateAction<TasksListProps[]>>;
-  setNumberMessages: React.Dispatch<React.SetStateAction<numberMessagesProps[]>>;
-  message: (action: () => void, id: string, prevTasksOverride?: TasksListProps[]) => string;
-  onDetailsClick: (task: TasksListProps, event: React.MouseEvent<HTMLButtonElement>) => void;
-  sorting: string;
-};
+import { type ListTasksProps } from "../scripts/types.ts";
 
 const SNAP_DURATION = 180;
 const SCROLL_ZONE = 80;

@@ -1,8 +1,4 @@
-type addTaskProps = {
-  addTask: () => void;
-  setText: React.Dispatch<React.SetStateAction<string>>;
-  text: string;
-}
+import { type addTaskProps } from "../scripts/types";
 
 // Renders the input field and button used to create a new task.
 const AddTask: React.FC<addTaskProps> = ({ addTask, setText, text }) => {
