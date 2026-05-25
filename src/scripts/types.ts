@@ -52,7 +52,7 @@ export type FiltersProps = {
   search: string;
   setSearch: React.Dispatch<React.SetStateAction<string>>;
   tasks: TasksListProps[];
-  setTasks: React.Dispatch<React.SetStateAction<TasksListProps[]>>;
+  setFilteredTasks?: React.Dispatch<React.SetStateAction<TasksListProps[] | null>>;
 }
 
 export type LineTasksProps = {
@@ -68,6 +68,8 @@ export type LineTasksProps = {
 
 export type ListTasksProps = {
   tasks: TasksListProps[];
+  sourceTasks?: TasksListProps[];
+  preserveOrder?: boolean;
   setTasks: React.Dispatch<React.SetStateAction<TasksListProps[]>>;
   setNumberMessages: React.Dispatch<React.SetStateAction<numberMessagesProps[]>>;
   message: (action: () => void, id: string, prevTasksOverride?: TasksListProps[]) => string;

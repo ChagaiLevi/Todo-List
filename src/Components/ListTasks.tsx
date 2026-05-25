@@ -7,7 +7,16 @@ const SCROLL_ZONE = 80;
 const SCROLL_SPEED = 10;
 
 // Renders the task list and manages drag-and-drop reordering behavior.
-const ListTasks: React.FC<ListTasksProps> = ({ tasks, setTasks, setNumberMessages, message, onDetailsClick, sorting }) => {
+const ListTasks: React.FC<ListTasksProps> = ({
+  tasks,
+  sourceTasks,
+  preserveOrder,
+  setTasks,
+  setNumberMessages,
+  message,
+  onDetailsClick,
+  sorting,
+}) => {
 
   const listRef = useRef<HTMLDivElement>(null);
   const dragState = useRef<{
@@ -167,18 +176,19 @@ const ListTasks: React.FC<ListTasksProps> = ({ tasks, setTasks, setNumberMessage
     [onMouseMove, onMouseUp, scrollLoop]
   );
 
+  const taskSource = sourceTasks ?? tasks;
   let displayedTasks = tasks;
 
-  if (sorting === 'customer') {
+  if (!preserveOrder && sorting === 'customer') {
     displayedTasks = tasks.slice().reverse();
   }
-  else if (sorting === 'A-Z') {
+  else if (!preserveOrder && sorting === 'A-Z') {
     displayedTasks = tasks.slice().sort((a, b) => a.text.localeCompare(b.text));
   }
-  else if (sorting === 'Z-A') {
+  else if (!preserveOrder && sorting === 'Z-A') {
     displayedTasks = tasks.slice().sort((a, b) => b.text.localeCompare(a.text));
   }
-  else if (sorting === "date" || sorting === "date-reverse") {
+  else if (!preserveOrder && (sorting === "date" || sorting === "date-reverse")) {
     displayedTasks = tasks.slice().sort((a, b) => {
       return sorting === "date"
         ? a.createdAt - b.createdAt
@@ -193,7 +203,7 @@ const ListTasks: React.FC<ListTasksProps> = ({ tasks, setTasks, setNumberMessage
           <LineTasks
             task={task}
             key={task.id}
-            tasks={tasks}
+            tasks={taskSource}
             setTasks={setTasks}
             setNumberMessages={setNumberMessages}
             message={message}

@@ -1,79 +1,80 @@
+import React, { useCallback, useEffect } from "react";
 import Fuse from "fuse.js";
-import { type FiltersProps } from "../scripts/types.ts";
+import { type FiltersProps, type TasksListProps } from "../scripts/types.ts";
 
-const Filters: React.FC<FiltersProps> = ({ setSorting, sorting, search, setSearch, tasks, setTasks }) => {
-  const fuse = new Fuse(tasks, {
-    keys: ["text"],
-    includeScore: true,
-    includeMatches: true,
-    threshold: 0.4,
-  });
-
-  console.log("Fuse instance:", fuse);
-
-  const searchTasks = (query: string) => {
-    const results = fuse.search(query);
-
-    return {
-      results,
-      rest: tasks.filter(
-        task => !results.find(r => r.item.id === task.id)
-      ),
-    };
-  };
-
-  const highlightFuse = (
-    text: string,
-    matches: readonly [number, number][]
-  ) => {
-    let lastIndex = 0;
-    const parts = [];
-
-    matches.forEach(([start, end], i) => {
-      if (lastIndex < start) {
-        parts.push(text.slice(lastIndex, start));
-      }
-
-      parts.push(
-        <span key={i} style={{ backgroundColor: "yellow" }}>
-          {text.slice(start, end + 1)}
-        </span>
-      );
-
-      lastIndex = end + 1;
-    });
-
-    if (lastIndex < text.length) {
-      parts.push(text.slice(lastIndex));
+const Filters: React.FC<FiltersProps> = ({
+  setSorting,
+  sorting,
+  search,
+  setSearch,
+  tasks,
+  setFilteredTasks,
+}) => {
+  const searchFunction = useCallback((searchValue = search) => {
+    if (!searchValue.trim()) {
+      setFilteredTasks?.(null);
+      return;
     }
 
-    return <>{parts}</>;
-  };
+    setSorting('search');
 
-  const { results } = searchTasks('l');
+    const fuse = new Fuse<TasksListProps>(tasks, {
+      keys: ["text"],
+      threshold: 0.4,
+    });
 
-  // setSorting('search');
+    const results = fuse.search(searchValue);
+    setFilteredTasks?.(results.map((result) => result.item));
+  }, [search, setFilteredTasks, setSorting, tasks]);
 
-
+  useEffect(() => {
+    if (search.trim()) searchFunction(search);
+  }, [search, searchFunction, tasks]);
 
   return (
     <div className="todo-filters">
-      <select
-        id="sort-select"
-        className="filter-select"
-        value={sorting}
-        onChange={(e) => setSorting(e.target.value)}
-      >
-        <option value='customer'>customer</option>
-        <option value='A-Z' >A - Z</option>
-        <option value='Z-A'>Z - A</option>
-        <option value='date'>Creation date</option>
-        <option value='date-reverse'>Reverse creation date</option>
-      </select>
-      <input id="search-input" type="text" placeholder="Search tasks" className="filter-input" value={search} onChange={(e) => setSearch(e.target.value)} />
-      <button id="search-btn">Search</button>
-    </div>
-  )
-}
+      <span style={sorting === 'search' ? { pointerEvents: 'none', cursor: 'not-allowed', } : {}}>
+        <select
+          id="sort-select"
+          className="filter-select"
+          value={sorting}
+          onChange={(e) => setSorting(e.target.value)}
+        >
+          <option value="customer">customer</option>
+          <option value="A-Z">A - Z</option>
+          <option value="Z-A">Z - A</option>
+          <option value="date">Creation date</option>
+          <option value="date-reverse">Reverse creation date</option>
+        </select>
+      </span>
 
-export default Filters
+      <input
+        id="search-input"
+        type="text"
+        placeholder="Search tasks"
+        className="filter-input"
+        value={search}
+        onChange={(e) => {
+          const nextSearch: string = e.target.value;
+          if (!nextSearch.trim()) {
+            setFilteredTasks?.(null);
+          }
+          setSearch(nextSearch);
+        }}
+        onKeyDown={(e) => {
+          const nextSearch: string = (e.target as HTMLInputElement).value;
+
+          if (nextSearch.trim().length === 1) {
+            setSorting("customer");
+          }
+        }}
+      />
+
+      <button id="search-btn" onClick={() => searchFunction()}>
+        Search
+      </button>
+    </div>
+  );
+};
+
+export default Filters;

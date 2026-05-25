@@ -49,6 +49,8 @@ function App() {
   });
   const [sorting, setSorting] = useState<string>('customer');
   const [search, setSearch] = useState<string>('');
+  const [filteredTasks, setFilteredTasks] = useState<TasksListProps[] | null>(null);
+  //const [storing, setStoring] = useState<boolean>(true);
   const prevTasksRef = useRef(tasks);
   const numberMessagesRef = useRef(numberMessages);
   const exitingMessageIdsRef = useRef<Set<string>>(new Set());
@@ -300,16 +302,16 @@ function App() {
     };
   }, [detailsPopup.isVisible, hideDetailsPopup]);
 
-
-  console.log(tasks);
   return (
     <>
       <div className="container">
         <Title />
         <AddTask addTask={addTask} setText={setText} text={text} />
-        <Filters setSorting={setSorting} sorting={sorting} search={search} setSearch={setSearch} tasks={tasks} setTasks={setTasks} />
+        <Filters setSorting={setSorting} sorting={sorting} search={search} setSearch={setSearch} tasks={tasks} setFilteredTasks={setFilteredTasks} />
         <ListTasks
-          tasks={tasks}
+          tasks={filteredTasks ?? tasks}
+          sourceTasks={tasks}
+          preserveOrder={filteredTasks !== null}
           setTasks={setTasks}
           setNumberMessages={setNumberMessages}
           message={message}
