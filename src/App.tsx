@@ -307,7 +307,7 @@ function App() {
       <div className="container">
         <Title />
         <AddTask addTask={addTask} setText={setText} text={text} />
-        <Filters setSorting={setSorting} sorting={sorting} search={search} setSearch={setSearch} tasks={tasks} setFilteredTasks={setFilteredTasks} />
+        <Filters setSorting={setSorting} sorting={sorting} search={search} setSearch={setSearch} tasks={tasks} setFilteredTasks={setFilteredTasks} filteredTasks={filteredTasks} />
         <ListTasks
           tasks={filteredTasks ?? tasks}
           sourceTasks={tasks}

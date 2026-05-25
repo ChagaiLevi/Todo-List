@@ -52,7 +52,8 @@ export type FiltersProps = {
   search: string;
   setSearch: React.Dispatch<React.SetStateAction<string>>;
   tasks: TasksListProps[];
-  setFilteredTasks?: React.Dispatch<React.SetStateAction<TasksListProps[] | null>>;
+  setFilteredTasks: React.Dispatch<React.SetStateAction<TasksListProps[] | null>>;
+  filteredTasks: TasksListProps[] | null;
 }
 
 export type LineTasksProps = {
