@@ -44,7 +44,7 @@ export type addTaskProps = {
   addTask: () => void;
   setText: React.Dispatch<React.SetStateAction<string>>;
   text: string;
-}
+};
 
 export type FiltersProps = {
   setSorting: React.Dispatch<React.SetStateAction<string>>;
@@ -54,7 +54,7 @@ export type FiltersProps = {
   tasks: TasksListProps[];
   setFilteredTasks: React.Dispatch<React.SetStateAction<TasksListProps[] | null>>;
   filteredTasks: TasksListProps[] | null;
-}
+};
 
 export type LineTasksProps = {
   task: TasksListProps;
@@ -65,6 +65,7 @@ export type LineTasksProps = {
   onDragHandleMouseDown: (event: React.MouseEvent, itemEl: HTMLElement) => void;
   onDetailsClick: (event: React.MouseEvent<HTMLButtonElement>) => void;
   storing: string;
+  search: string;
 };
 
 export type ListTasksProps = {
@@ -76,10 +77,18 @@ export type ListTasksProps = {
   message: (action: () => void, id: string, prevTasksOverride?: TasksListProps[]) => string;
   onDetailsClick: (task: TasksListProps, event: React.MouseEvent<HTMLButtonElement>) => void;
   sorting: string;
+  search: string;
 };
 
 export type UndoToastProps = {
   numberMessages: numberMessagesProps[];
   setNumberMessages: React.Dispatch<React.SetStateAction<numberMessagesProps[]>>;
   startExit: (messageId: string, e: HTMLElement | null) => void;
-}
+};
+
+export type DetailsProps = {
+  detailsPopup: DetailsPopupStateProps;
+  detailsPopupRef: React.RefObject<HTMLDivElement | null>;
+  transitionInProgressRef: React.MutableRefObject<boolean>;
+  setDetailsPopup: React.Dispatch<React.SetStateAction<DetailsPopupStateProps>>;
+};

@@ -9,7 +9,6 @@ const Filters: React.FC<FiltersProps> = ({
   setSearch,
   tasks,
   setFilteredTasks,
-  filteredTasks,
 }) => {
   const searchFunction = useCallback((searchValue = search) => {
     if (!searchValue.trim()) {
@@ -27,57 +26,17 @@ const Filters: React.FC<FiltersProps> = ({
     });
 
     const results = fuse.search(searchValue);
-
-    results.map((task) => {
-      task.item.text = highlightTextReact(task.item.text, task.matches?.[0]?.indices || []) as unknown as string;
-
-      return filteredTasks;
-    });
-
     setFilteredTasks?.(results.map((result) => result.item));
   }, [search, setFilteredTasks, setSorting, tasks]);
 
-  const highlightTextReact = (
-    text: string,
-    indices: readonly [number, number][]
-  ) => {
-    const elements: (string | React.JSX.Element)[] = [];
-    let lastIndex = 0;
-
-    indices.forEach(([start, end], i) => {
-      elements.push(text.slice(lastIndex, start));
-      elements.push(
-        <span key={i} style={{ backgroundColor: "cyan", color: "black" }}>
-          {text.slice(start, end + 1)}
-        </span>
-      );
-      lastIndex = end + 1;
-    });
-
-    elements.push(text.slice(lastIndex));
-
-    return elements;
-  };
-
-  const extractText = (nodes: React.ReactNode[]): string => {
-    return React.Children.toArray(nodes)
-      .map((node) => {
-        if (typeof node === "string") return node;
-        if (typeof node === "number") return node.toString();
-
-        if (React.isValidElement(node)) {
-          const element = node as React.ReactElement<any>;
-
-          return extractText(element.props.children);
-        }
-
-        return "";
-      })
-      .join("");
-  }
-
   useEffect(() => {
-    if (search.trim()) searchFunction(search);
+    if (search.trim()) {
+      searchFunction(search);
+      return;
+    }
+
+    setFilteredTasks?.(null);
+    setSorting('customer');
   }, [search, searchFunction, tasks]);
 
   return (
@@ -109,18 +68,6 @@ const Filters: React.FC<FiltersProps> = ({
             setFilteredTasks?.(null);
           }
           setSearch(nextSearch);
-        }}
-        onKeyDown={(e) => {
-          const nextSearch: string = (e.target as HTMLInputElement).value;
-
-          if (nextSearch.trim().length === 1) {
-            setSorting("customer");
-
-            tasks.map((task) => {
-              task.text = extractText(task.text as unknown as React.ReactNode[]);
-              return task;
-            });
-          }
         }}
       />
 

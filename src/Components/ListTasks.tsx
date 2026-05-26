@@ -16,6 +16,7 @@ const ListTasks: React.FC<ListTasksProps> = ({
   message,
   onDetailsClick,
   sorting,
+  search,
 }) => {
 
   const listRef = useRef<HTMLDivElement>(null);
@@ -210,6 +211,7 @@ const ListTasks: React.FC<ListTasksProps> = ({
             onDragHandleMouseDown={handleDragHandleMouseDown}
             onDetailsClick={(event) => onDetailsClick(task, event)}
             storing={sorting}
+            search={search}
           />
         ))}
       </div>

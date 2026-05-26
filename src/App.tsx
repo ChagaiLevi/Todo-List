@@ -3,6 +3,7 @@ import AddTask from "./Components/AddTask";
 import Filters from "./Components/Filters";
 import ListTasks from "./Components/ListTasks";
 import UndoToast from "./Components/UndoToast";
+import Details from "./Components/Details";
 
 import { type TasksListProps } from "./scripts/types.ts";
 import { type numberMessagesProps } from "./scripts/types.ts";
@@ -11,6 +12,7 @@ import { type DetailsPopupStateProps } from "./scripts/types.ts";
 
 import { createTaskDetails } from './scripts/tasksFucntion.ts';
 import { getSavedTaskDate } from './scripts/tasksFucntion.ts';
+import { normalizeTaskText } from './scripts/tasksFucntion.ts';
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { v4 as uuidv4 } from "uuid";
@@ -33,6 +35,7 @@ function App() {
 
       return {
         ...task,
+        text: normalizeTaskText(task.text),
         ...normalizedDetails,
       };
     });
@@ -105,6 +108,8 @@ function App() {
         messageItem.id === msgId ? { ...messageItem, text: 'Task added' } : messageItem
       )
     );
+
+    search && setSearch('');
 
     setText('');
   };
@@ -317,50 +322,9 @@ function App() {
           message={message}
           onDetailsClick={handleDetailsClick}
           sorting={sorting}
+          search={search}
         />
-        {detailsPopup.isMounted && (
-          <div
-            ref={detailsPopupRef}
-            id="details-popup"
-            className={detailsPopup.isVisible ? "show" : ""}
-            style={{
-              display: "block",
-              position: "fixed",
-              zIndex: 2000,
-              left: `${detailsPopup.left}px`,
-              top: `${detailsPopup.top}px`,
-              background: "rgba(5, 5, 5, 0.95)",
-              backdropFilter: "blur(20px)",
-              padding: "12px 18px",
-              borderRadius: "10px",
-              color: "#00e7ff",
-              boxShadow: "0 0 25px rgba(0, 231, 255, 0.6)",
-              border: "1px solid rgba(0, 231, 255, 0.2)",
-              fontSize: "0.95rem",
-              textAlign: "center",
-              lineHeight: 1.35,
-              minWidth: "135px",
-              boxSizing: "border-box",
-            }}
-            onTransitionEnd={(event) => {
-              if (event.propertyName !== "opacity") return;
-
-              if (detailsPopup.isVisible) {
-                transitionInProgressRef.current = false;
-                return;
-              }
-
-              setDetailsPopup((prev) => ({ ...prev, isMounted: false }));
-              transitionInProgressRef.current = false;
-            }}
-          >
-            Details:
-            <br />
-            {detailsPopup.detailsDate}
-            <br />
-            {detailsPopup.detailsTime}
-          </div>
-        )}
+        <Details detailsPopup={detailsPopup} detailsPopupRef={detailsPopupRef} transitionInProgressRef={transitionInProgressRef} setDetailsPopup={setDetailsPopup} />
       </div>
       <UndoToast
         numberMessages={numberMessages}
