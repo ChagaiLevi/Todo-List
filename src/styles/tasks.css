@@ -1,0 +1,412 @@
+/* Task feature styles, interactions, and animations. */
+.todo-input {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  padding: 0 2rem;
+  opacity: 0;
+  transform: translateY(20px);
+  animation: slideUp 0.8s ease-out 0.3s forwards;
+}
+
+#new-task {
+  flex: 1;
+  padding: 15px;
+  border: none;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  color: #00e7ff;
+  font-size: 1.1rem;
+  font-family: "Orbitron", sans-serif;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 12px rgba(0, 231, 255, 0.4);
+}
+
+#new-task:focus {
+  outline: none;
+  box-shadow: 0 0 20px rgba(0, 231, 255, 0.8);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+#new-task::placeholder,
+.filter-input::placeholder {
+  color: rgba(0, 231, 255, 0.4);
+}
+
+#add-btn,
+#search-btn {
+  padding: 15px 30px;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(45deg, #00e7ff, #00b4d8);
+  color: #fff;
+  font-weight: 700;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 20px rgba(0, 231, 255, 0.7), 0 0 30px rgba(0, 231, 255, 0.5);
+}
+
+#add-btn:hover,
+#search-btn:hover {
+  background: linear-gradient(45deg, #00b4d8, #0088a9);
+  transform: scale(1.05);
+  box-shadow: 0 0 25px rgba(0, 231, 255, 0.9), 0 0 40px rgba(0, 231, 255, 0.6);
+}
+
+.todo-filters {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  padding: 0 2rem;
+  opacity: 0;
+  transform: translateY(20px);
+  animation: slideUp 1s ease-out 0.7s forwards;
+}
+
+.filter-select,
+.filter-input {
+  padding: 15px;
+  border: none;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  color: #00e7ff;
+  font-size: 1.1rem;
+  font-family: "Orbitron", sans-serif;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 12px rgba(0, 231, 255, 0.4);
+}
+
+.filter-select {
+  min-width: 240px;
+  cursor: pointer;
+}
+
+.filter-input {
+  flex: 1;
+}
+
+.filter-select:focus,
+.filter-input:focus {
+  outline: none;
+  box-shadow: 0 0 20px rgba(0, 231, 255, 0.8);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.filter-select option {
+  background: #111111;
+  color: #00e7ff;
+}
+
+.todo-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 0 2rem;
+}
+
+.todo-item {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(255, 255, 255, 0.03);
+  padding: 1rem;
+  border-radius: 12px;
+  transition:
+    transform 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid rgba(0, 231, 255, 0.2);
+  box-shadow: 0 0 12px rgba(0, 231, 255, 0.3);
+  opacity: 1;
+}
+
+.drag-handle {
+  background: #000000;
+  border: 1px solid rgba(0, 231, 255, 0.3);
+  border-radius: 8px;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+  cursor: grab;
+  flex-shrink: 0;
+  padding: 6px;
+  margin-right: 1rem;
+  box-shadow: 0 0 12px rgba(0, 231, 255, 0.3);
+  transition: all 0.3s ease;
+  user-select: none;
+}
+
+.drag-handle:hover {
+  box-shadow: 0 0 20px rgba(0, 231, 255, 0.6);
+  transform: scale(1.05);
+}
+
+.drag-handle:active {
+  cursor: grabbing;
+  transform: scale(0.92);
+}
+
+.stripe {
+  width: 20px;
+  height: 2.5px;
+  background: #00e7ff;
+  border-radius: 2px;
+  box-shadow: 0 0 5px rgba(0, 231, 255, 0.8);
+}
+
+.todo-item.dragging {
+  opacity: 0.45;
+  transform: scale(0.95);
+  box-shadow: 0 0 40px rgba(0, 231, 255, 0.9);
+  transition: none;
+  z-index: 1000;
+}
+
+.placeholder {
+  background: rgba(0, 231, 255, 0.08);
+  border: 2px dashed rgba(0, 231, 255, 0.6);
+  border-radius: 12px;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 0 15px rgba(0, 231, 255, 0.3);
+}
+
+.task-text,
+.task-input {
+  margin: 0;
+  font-size: 1.2rem;
+  color: #00e7ff;
+  text-shadow: 0 0 15px rgba(0, 231, 255, 0.9), 0 0 25px rgba(0, 231, 255, 0.6);
+  flex-grow: 1;
+  text-align: left;
+  line-height: 1.5;
+  padding: 8px 12px;
+  margin-right: 1.5rem;
+}
+
+.task-text {
+  display: inline-flex;
+  align-items: center;
+}
+
+.task-text.completed {
+  text-decoration: line-through;
+  color: rgba(0, 231, 255, 0.5);
+  text-shadow: 0 0 10px rgba(0, 231, 255, 0.5);
+}
+
+.task-search-highlight {
+  background-color: cyan;
+  color: black;
+}
+
+.task-input {
+  background: rgba(255, 255, 255, 0.05);
+  border: none;
+  border-radius: 8px;
+  font-family: "Orbitron", sans-serif;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 10px rgba(0, 231, 255, 0.4);
+}
+
+.task-input:focus {
+  outline: none;
+  box-shadow: 0 0 15px rgba(0, 231, 255, 0.8);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-shrink: 0;
+  align-items: center;
+}
+
+.edit-btn,
+.complete-btn,
+.delete-btn,
+.details-btn {
+  border: none;
+  background: linear-gradient(45deg, #00e7ff, #00b4d8);
+  color: #fff;
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 8px 12px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 15px rgba(0, 231, 255, 0.7), 0 0 25px rgba(0, 231, 255, 0.4);
+  line-height: 1;
+  min-width: 36px;
+  text-align: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(0, 231, 255, 0.4);
+  animation: pulse 3s ease-in-out forwards;
+}
+
+.edit-btn:hover,
+.complete-btn:hover,
+.delete-btn:hover,
+.details-btn:hover {
+  background: linear-gradient(45deg, #00b4d8, #0088a9);
+  box-shadow: 0 0 20px rgba(0, 231, 255, 0.9), 0 0 35px rgba(0, 231, 255, 0.6);
+  transform: scale(1.05);
+  border: 1px solid rgba(0, 231, 255, 0.6);
+}
+
+.no-tasks {
+  font-size: 1.2rem;
+  color: rgba(0, 231, 255, 0.7);
+  text-shadow: 0 0 15px rgba(0, 231, 255, 0.7), 0 0 25px rgba(0, 231, 255, 0.4);
+  text-align: center;
+  margin: 2rem 0;
+  padding: 1rem;
+  animation: fadeIn 0.5s ease-out;
+}
+
+.todo-item.deleting {
+  animation: fadeOut 0.3s ease-out forwards;
+}
+
+#notifications {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 1000;
+}
+
+.notification {
+  background: rgba(5, 5, 5, 0.95);
+  padding: 1rem;
+  margin: 0;
+  border-radius: 12px;
+  color: #00e7ff;
+  box-shadow: 0 0 20px rgba(0, 231, 255, 0.5);
+  align-items: center;
+  gap: 1rem;
+  font-family: "Orbitron", sans-serif;
+  border: 1px solid rgba(0, 231, 255, 0.2);
+  overflow: hidden;
+  transition:
+    opacity 0.3s ease-out,
+    transform 0.3s ease-out,
+    max-height 0.3s ease-out,
+    padding 0.3s ease-out,
+    margin 0.3s ease-out;
+}
+
+.notify-text {
+  margin: 0;
+  font-size: 1.1rem;
+  text-shadow: 0 0 15px rgba(0, 231, 255, 0.7);
+}
+
+.undo-btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  background: linear-gradient(45deg, #00e7ff, #00b4d8);
+  color: #fff;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 15px rgba(0, 231, 255, 0.7), 0 0 25px rgba(0, 231, 255, 0.4);
+}
+
+.undo-btn:hover {
+  background: linear-gradient(45deg, #00b4d8, #0088a9);
+  transform: scale(1.05);
+  box-shadow: 0 0 20px rgba(0, 231, 255, 0.9), 0 0 35px rgba(0, 231, 255, 0.6);
+}
+
+.undo-btn:disabled {
+  cursor: default;
+  opacity: 0.7;
+  transform: none;
+}
+
+.notification.undoing {
+  animation: undoFlash 0.4s ease-out forwards;
+}
+
+.todo-item.restored {
+  animation: restoredHighlight 0.4s ease-out;
+}
+
+.task-details-popover {
+  position: fixed;
+  z-index: 2000;
+  display: block;
+  min-width: 135px;
+  box-sizing: border-box;
+  padding: 12px 18px;
+  border-radius: 10px;
+  background: rgba(5, 5, 5, 0.95);
+  backdrop-filter: blur(20px);
+  color: #00e7ff;
+  box-shadow: 0 0 25px rgba(0, 231, 255, 0.6);
+  border: 1px solid rgba(0, 231, 255, 0.2);
+  font-size: 0.95rem;
+  text-align: center;
+  line-height: 1.35;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  opacity: 0;
+  transform: scale(0.85) translateY(12px);
+  transition:
+    opacity 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+    transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.task-details-popover.show {
+  opacity: 1;
+  transform: scale(1) translateY(0);
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  to {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+}
+
+@keyframes undoFlash {
+  0% {
+    background: rgba(5, 5, 5, 0.95);
+    box-shadow: 0 0 20px rgba(0, 231, 255, 0.5);
+  }
+
+  50% {
+    background: rgba(0, 231, 255, 0.2);
+    box-shadow: 0 0 28px rgba(0, 231, 255, 0.9);
+  }
+
+  100% {
+    background: rgba(5, 5, 5, 0.95);
+    box-shadow: 0 0 20px rgba(0, 231, 255, 0.5);
+  }
+}
+
+@keyframes restoredHighlight {
+  0% {
+    background: rgba(0, 231, 255, 0.1);
+  }
+
+  100% {
+    background: rgba(255, 255, 255, 0.03);
+  }
+}

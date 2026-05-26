@@ -1,336 +1,86 @@
 import Title from "./Components/Title";
-import AddTask from "./Components/AddTask";
-import Filters from "./Components/Filters";
-import ListTasks from "./Components/ListTasks";
-import UndoToast from "./Components/UndoToast";
-import Details from "./Components/Details";
+import AddTask from "./features/tasks/components/AddTask";
+import TaskDetailsPopover from "./features/tasks/components/TaskDetailsPopover";
+import TaskFilters from "./features/tasks/components/TaskFilters";
+import TaskList from "./features/tasks/components/TaskList";
+import UndoToast from "./features/tasks/components/UndoToast";
+import { buildTask } from "./features/tasks/lib/taskFactory";
+import { useTaskDetailsPopover } from "./features/tasks/hooks/useTaskDetailsPopover";
+import { useTasks } from "./features/tasks/hooks/useTasks";
+import { useUndoToasts } from "./features/tasks/hooks/useUndoToasts";
 
-import { type TasksListProps } from "./scripts/types.ts";
-import { type numberMessagesProps } from "./scripts/types.ts";
-import { type SavedTaskProps } from "./scripts/types.ts";
-import { type DetailsPopupStateProps } from "./scripts/types.ts";
-
-import { createTaskDetails } from './scripts/tasksFucntion.ts';
-import { getSavedTaskDate } from './scripts/tasksFucntion.ts';
-import { normalizeTaskText } from './scripts/tasksFucntion.ts';
-
-import { useState, useEffect, useRef, useCallback } from "react";
-import { v4 as uuidv4 } from "uuid";
-
-
-const TOAST_LIFETIME_MS = 5000;
-const TOAST_EXIT_DURATION_MS = 300;
-
-// Coordinates the full todo app: task state, undo toasts, and the details popup.
 function App() {
-  const [tasks, setTasks] = useState<TasksListProps[]>(() => {
-    const savedTasks = localStorage.getItem("tasks");
-    if (!savedTasks) return [];
+  const {
+    tasks,
+    setTasks,
+    draftText,
+    setDraftText,
+    sorting,
+    setSorting,
+    search,
+    setSearch,
+    visibleTasks,
+    canDrag,
+  } = useTasks();
+  const { toasts, setToasts, showUndoableToast, startExit } = useUndoToasts(setTasks);
+  const {
+    detailsPopover,
+    detailsPopoverRef,
+    transitionInProgressRef,
+    setDetailsPopover,
+    hideDetailsPopover,
+    handleDetailsClick,
+  } = useTaskDetailsPopover();
 
-    const parsedTasks: SavedTaskProps[] = JSON.parse(savedTasks);
+  const handleAddTask = () => {
+    if (!draftText.trim()) return;
 
-    return parsedTasks.map((task) => {
-      const normalizedDate = getSavedTaskDate(task);
-      const normalizedDetails = createTaskDetails(normalizedDate);
+    const newTask = buildTask(draftText);
 
-      return {
-        ...task,
-        text: normalizeTaskText(task.text),
-        ...normalizedDetails,
-      };
-    });
-  });
-  const [text, setText] = useState<string>('');
-  const [numberMessages, setNumberMessages] = useState<numberMessagesProps[]>([]);
-  const [detailsPopup, setDetailsPopup] = useState<DetailsPopupStateProps>({
-    isMounted: false,
-    isVisible: false,
-    left: 0,
-    top: 0,
-    detailsDate: "",
-    detailsTime: "",
-  });
-  const [sorting, setSorting] = useState<string>('customer');
-  const [search, setSearch] = useState<string>('');
-  const [filteredTasks, setFilteredTasks] = useState<TasksListProps[] | null>(null);
-  //const [storing, setStoring] = useState<boolean>(true);
-  const prevTasksRef = useRef(tasks);
-  const numberMessagesRef = useRef(numberMessages);
-  const exitingMessageIdsRef = useRef<Set<string>>(new Set());
-  const detailsPopupRef = useRef<HTMLDivElement>(null);
-  const activeDetailsTaskIdRef = useRef<string | null>(null);
-  const transitionInProgressRef = useRef(false);
-
-  // Saves tasks to localStorage whenever the list changes.
-  useEffect(() => {
-    if (prevTasksRef.current !== tasks) {
-      localStorage.setItem('tasks', JSON.stringify(tasks));
-    }
-    prevTasksRef.current = tasks;
-  }, [tasks]);
-
-  // Keeps a ref in sync so timeout callbacks can read the latest toast list.
-  useEffect(() => {
-    numberMessagesRef.current = numberMessages;
-  }, [numberMessages]);
-
-  // Clears any pending toast timers when the app unmounts.
-  useEffect(() => {
-    return () => {
-      numberMessagesRef.current.forEach((messageItem) => {
-        if (messageItem.timeOut) clearTimeout(messageItem.timeOut);
-        if (messageItem.deleteTimeout) clearTimeout(messageItem.deleteTimeout);
-      });
-    };
-  }, []);
-
-  // Creates a new task, adds it to the list, and shows a matching toast.
-  const addTask = () => {
-    if (!text.trim()) return;
-
-    const newTask: TasksListProps = {
-      id: uuidv4(),
-      text,
-      completed: false,
-      isEditing: false,
-      isDeleting: false,
-      isRestored: false,
-      ...createTaskDetails(),
-    };
-
-    const add = () => {
-      setTasks([...tasks, newTask]);
-    };
-
-    const msgId = message(add, newTask.id);
-    setNumberMessages((prevArr) =>
-      prevArr.map((messageItem) =>
-        messageItem.id === msgId ? { ...messageItem, text: 'Task added' } : messageItem
-      )
-    );
-
-    search && setSearch('');
-
-    setText('');
-  };
-
-  // Runs a task action and creates an undoable toast that remembers the previous task list.
-  const message = (
-    action: () => void,
-    _taskId: string,
-    prevTasksOverride?: TasksListProps[]
-  ) => {
-    const rawPrev: TasksListProps[] = prevTasksOverride ?? prevTasksRef.current;
-    const prev = rawPrev.map((task) => ({ ...task }));
-
-    const msgId = uuidv4();
-    const autoCloseTimeout = setTimeout(() => {
-      const element = document.querySelector(`[data-message-id='${msgId}']`) as HTMLElement | null;
-      startExit(msgId, element);
-    }, TOAST_LIFETIME_MS);
-
-    const newMessage: numberMessagesProps = {
-      id: msgId,
-      text: 'Task edited',
-      style: { opacity: 0, transform: 'translateY(-100px)', display: 'flex' },
-      timeOut: autoCloseTimeout,
-      prevTasks: prev,
-    };
-
-    setNumberMessages((prevArr) => [...prevArr, newMessage]);
-
-    action();
-
-    requestAnimationFrame(() => {
-      setNumberMessages((prevArr) =>
-        prevArr.map((messageItem) =>
-          messageItem.id === msgId
-            ? {
-              ...messageItem,
-              style: { ...messageItem.style, opacity: 1, transform: 'translateY(0) scale(1)' },
-            }
-            : messageItem
-        )
-      );
+    showUndoableToast({
+      action: () => setTasks((prev) => [...prev, newTask]),
+      previousTasks: tasks,
+      text: "Task added",
     });
 
-    return msgId;
-  };
-
-  // Animates a toast out, removes it, and restores tasks if the user clicked Undo.
-  const startExit = (messageId: string, element: HTMLElement | null) => {
-    const messageItem = numberMessagesRef.current.find((item) => item.id === messageId);
-    if (!messageItem || messageItem.isExiting || exitingMessageIdsRef.current.has(messageId)) return;
-
-    exitingMessageIdsRef.current.add(messageId);
-
-    if (messageItem.timeOut) clearTimeout(messageItem.timeOut);
-    if (messageItem.deleteTimeout) clearTimeout(messageItem.deleteTimeout);
-
-    const measuredHeight = element?.offsetHeight ?? 0;
-
-    setNumberMessages((prev) =>
-      prev.map((messageItem) =>
-        messageItem.id === messageId
-          ? {
-            ...messageItem,
-            isExiting: true,
-            style: {
-              ...messageItem.style,
-              overflow: 'hidden',
-              maxHeight: measuredHeight ? `${measuredHeight}px` : '120px',
-            },
-          }
-          : messageItem
-      )
-    );
-
-    requestAnimationFrame(() => {
-      setNumberMessages((prev) =>
-        prev.map((messageItem) =>
-          messageItem.id === messageId
-            ? {
-              ...messageItem,
-              style: {
-                ...messageItem.style,
-                opacity: 0,
-                maxHeight: '0px',
-                padding: '0px',
-                margin: '0px',
-                transform: 'translateX(-100px) scale(0.8)',
-              },
-            }
-            : messageItem
-        )
-      );
-    });
-
-    setTimeout(() => {
-      const exitingMessage = numberMessagesRef.current.find((item) => item.id === messageId);
-
-      if (exitingMessage?.didUndo && exitingMessage.prevTasks) {
-        const restoredTasks = exitingMessage.prevTasks.map((task) => ({ ...task, isRestored: true }));
-        setTasks(restoredTasks);
-        setTimeout(() => {
-          setTasks((prev) => prev.map((task) => ({ ...task, isRestored: false })));
-        }, 400);
-      }
-
-      setNumberMessages((prev) => prev.filter((messageItem) => messageItem.id !== messageId));
-      exitingMessageIdsRef.current.delete(messageId);
-    }, TOAST_EXIT_DURATION_MS);
-  };
-
-  // Starts closing the details popup and resets which task is currently active.
-  const hideDetailsPopup = useCallback(() => {
-    if (!detailsPopup.isVisible) return;
-
-    transitionInProgressRef.current = true;
-    activeDetailsTaskIdRef.current = null;
-    setDetailsPopup((prev) => ({ ...prev, isVisible: false }));
-  }, [detailsPopup.isVisible]);
-
-  // Opens the details popup near the clicked task button and fills it with that task's metadata.
-  const handleDetailsClick = (task: TasksListProps, event: React.MouseEvent<HTMLButtonElement>) => {
-    const button = event.currentTarget;
-
-    event.stopPropagation();
-    event.nativeEvent.stopImmediatePropagation?.();
-
-    if (detailsPopup.isVisible && activeDetailsTaskIdRef.current === task.id) {
-      hideDetailsPopup();
-      return;
+    if (search.trim()) {
+      setSearch("");
+      setSorting("customer");
+      hideDetailsPopover();
     }
 
-    transitionInProgressRef.current = true;
-    activeDetailsTaskIdRef.current = task.id;
-
-    setDetailsPopup((prev) => ({
-      ...prev,
-      isMounted: true,
-      isVisible: prev.isMounted ? prev.isVisible : false,
-      detailsDate: task.detailsDate,
-      detailsTime: task.detailsTime,
-    }));
-
-    requestAnimationFrame(() => {
-      const popupElement = detailsPopupRef.current;
-      const buttonRect = button.getBoundingClientRect();
-      const itemRect = button.closest('.todo-item')?.getBoundingClientRect();
-
-      if (!popupElement || !itemRect) {
-        transitionInProgressRef.current = false;
-        return;
-      }
-
-      const popupRect = popupElement.getBoundingClientRect();
-
-      let left = buttonRect.left + buttonRect.width / 2 - popupRect.width / 2;
-      let top = itemRect.top - popupRect.height - 10;
-
-      if (left < 10) left = 10;
-      if (left + popupRect.width > window.innerWidth - 10) {
-        left = window.innerWidth - popupRect.width - 10;
-      }
-      if (top < 10) top = 10;
-
-      setDetailsPopup((prev) => ({
-        ...prev,
-        isMounted: true,
-        isVisible: true,
-        left,
-        top,
-        detailsDate: task.detailsDate,
-        detailsTime: task.detailsTime,
-      }));
-    });
+    setDraftText("");
   };
-
-  // Closes the details popup when the user clicks anywhere outside it.
-  useEffect(() => {
-    const handleDocumentClick = (event: MouseEvent) => {
-      const target = event.target as Node;
-
-      if (
-        detailsPopup.isVisible &&
-        !detailsPopupRef.current?.contains(target) &&
-        !Array.from(document.querySelectorAll('.details-btn')).some((button) => button.contains(target))
-      ) {
-        hideDetailsPopup();
-      }
-    };
-
-    document.addEventListener("click", handleDocumentClick);
-
-    return () => {
-      document.removeEventListener("click", handleDocumentClick);
-    };
-  }, [detailsPopup.isVisible, hideDetailsPopup]);
 
   return (
     <>
       <div className="container">
         <Title />
-        <AddTask addTask={addTask} setText={setText} text={text} />
-        <Filters setSorting={setSorting} sorting={sorting} search={search} setSearch={setSearch} tasks={tasks} setFilteredTasks={setFilteredTasks} filteredTasks={filteredTasks} />
-        <ListTasks
-          tasks={filteredTasks ?? tasks}
-          sourceTasks={tasks}
-          preserveOrder={filteredTasks !== null}
-          setTasks={setTasks}
-          setNumberMessages={setNumberMessages}
-          message={message}
-          onDetailsClick={handleDetailsClick}
-          sorting={sorting}
+        <AddTask addTask={handleAddTask} setText={setDraftText} text={draftText} />
+        <TaskFilters
           search={search}
+          setSearch={setSearch}
+          sorting={sorting}
+          setSorting={setSorting}
         />
-        <Details detailsPopup={detailsPopup} detailsPopupRef={detailsPopupRef} transitionInProgressRef={transitionInProgressRef} setDetailsPopup={setDetailsPopup} />
+        <TaskList
+          tasks={visibleTasks}
+          allTasks={tasks}
+          canDrag={canDrag}
+          search={search}
+          setTasks={setTasks}
+          setToasts={setToasts}
+          showUndoableToast={showUndoableToast}
+          onDetailsClick={handleDetailsClick}
+        />
+        <TaskDetailsPopover
+          detailsPopover={detailsPopover}
+          detailsPopoverRef={detailsPopoverRef}
+          transitionInProgressRef={transitionInProgressRef}
+          setDetailsPopover={setDetailsPopover}
+        />
       </div>
-      <UndoToast
-        numberMessages={numberMessages}
-        setNumberMessages={setNumberMessages}
-        startExit={startExit}
-      />
+      <UndoToast toasts={toasts} setToasts={setToasts} startExit={startExit} />
     </>
   );
 }

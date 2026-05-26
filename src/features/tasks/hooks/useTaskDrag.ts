@@ -1,24 +1,20 @@
-import { useRef, useCallback } from "react";
-import LineTasks from "./LineTasks";
-import { type ListTasksProps } from "../scripts/types.ts";
+import {
+  type Dispatch,
+  type MouseEvent as ReactMouseEvent,
+  type SetStateAction,
+  useCallback,
+  useRef,
+} from "react";
+import { type Task } from "../types";
 
 const SNAP_DURATION = 180;
 const SCROLL_ZONE = 80;
 const SCROLL_SPEED = 10;
 
-// Renders the task list and manages drag-and-drop reordering behavior.
-const ListTasks: React.FC<ListTasksProps> = ({
-  tasks,
-  sourceTasks,
-  preserveOrder,
-  setTasks,
-  setNumberMessages,
-  message,
-  onDetailsClick,
-  sorting,
-  search,
-}) => {
-
+export const useTaskDrag = (
+  canDrag: boolean,
+  setTasks: Dispatch<SetStateAction<Task[]>>
+) => {
   const listRef = useRef<HTMLDivElement>(null);
   const dragState = useRef<{
     item: HTMLElement;
@@ -29,7 +25,6 @@ const ListTasks: React.FC<ListTasksProps> = ({
   } | null>(null);
   const scrollRafRef = useRef<number | null>(null);
 
-  // Auto-scrolls the page while a dragged item is near the top or bottom of the viewport.
   const scrollLoop = useCallback(() => {
     const dragData = dragState.current;
     if (!dragData) return;
@@ -46,7 +41,6 @@ const ListTasks: React.FC<ListTasksProps> = ({
     scrollRafRef.current = requestAnimationFrame(scrollLoop);
   }, []);
 
-  // Stops the auto-scroll loop after dragging finishes.
   const stopScroll = useCallback(() => {
     if (scrollRafRef.current !== null) {
       cancelAnimationFrame(scrollRafRef.current);
@@ -54,8 +48,7 @@ const ListTasks: React.FC<ListTasksProps> = ({
     }
   }, []);
 
-  // Finds the task element the dragged item should be inserted before.
-  const getDragAfterElement = (y: number): HTMLElement | null => {
+  const getDragAfterElement = useCallback((y: number): HTMLElement | null => {
     const list = listRef.current;
     if (!list) return null;
 
@@ -69,9 +62,8 @@ const ListTasks: React.FC<ListTasksProps> = ({
       },
       { offset: Number.NEGATIVE_INFINITY, element: null }
     ).element;
-  };
+  }, []);
 
-  // Moves the dragged task with the mouse and repositions the placeholder in the list.
   const onMouseMove = useCallback((event: MouseEvent) => {
     const dragData = dragState.current;
     if (!dragData) return;
@@ -89,9 +81,8 @@ const ListTasks: React.FC<ListTasksProps> = ({
     } else {
       list.insertBefore(dragData.placeholder, after);
     }
-  }, []);
+  }, [getDragAfterElement]);
 
-  // Finishes a drag, snaps the item into place, and saves the new task order in state.
   const onMouseUp = useCallback(() => {
     const dragData = dragState.current;
     if (!dragData) return;
@@ -130,94 +121,52 @@ const ListTasks: React.FC<ListTasksProps> = ({
         const storageIds = displayIds.slice().reverse();
 
         setTasks((prev) => {
-          const map = new Map(prev.map((task) => [task.id, task]));
-          return storageIds.map((id) => map.get(id)!).filter(Boolean);
+          const taskMap = new Map(prev.map((task) => [task.id, task]));
+          return storageIds.map((id) => taskMap.get(id)!).filter(Boolean);
         });
       }
 
       dragState.current = null;
     }, SNAP_DURATION);
-  }, [onMouseMove, stopScroll, setTasks]);
+  }, [onMouseMove, setTasks, stopScroll]);
 
-  // Starts dragging when the handle is pressed and prepares the floating task element.
-  const handleDragHandleMouseDown = useCallback(
-    (event: React.MouseEvent, itemEl: HTMLElement) => {
-      event.preventDefault();
+  const handleDragHandleMouseDown = useCallback((
+    event: ReactMouseEvent,
+    itemEl: HTMLElement
+  ) => {
+    if (!canDrag) return;
 
-      const rect = itemEl.getBoundingClientRect();
+    event.preventDefault();
 
-      const placeholder = document.createElement("div");
-      placeholder.classList.add("placeholder");
-      placeholder.style.height = `${rect.height}px`;
-      itemEl.parentNode!.insertBefore(placeholder, itemEl);
+    const rect = itemEl.getBoundingClientRect();
 
-      itemEl.classList.add("dragging");
-      itemEl.style.position = "fixed";
-      itemEl.style.left = `${rect.left}px`;
-      itemEl.style.top = `${rect.top}px`;
-      itemEl.style.width = `${rect.width}px`;
-      itemEl.style.zIndex = "1000";
-      itemEl.style.transition = "none";
+    const placeholder = document.createElement("div");
+    placeholder.classList.add("placeholder");
+    placeholder.style.height = `${rect.height}px`;
+    itemEl.parentNode!.insertBefore(placeholder, itemEl);
 
-      document.body.appendChild(itemEl);
+    itemEl.classList.add("dragging");
+    itemEl.style.position = "fixed";
+    itemEl.style.left = `${rect.left}px`;
+    itemEl.style.top = `${rect.top}px`;
+    itemEl.style.width = `${rect.width}px`;
+    itemEl.style.zIndex = "1000";
+    itemEl.style.transition = "none";
 
-      dragState.current = {
-        item: itemEl,
-        placeholder,
-        shiftX: event.clientX - rect.left,
-        shiftY: event.clientY - rect.top,
-        mouseY: event.clientY,
-      };
+    document.body.appendChild(itemEl);
 
-      document.addEventListener("mousemove", onMouseMove);
-      document.addEventListener("mouseup", onMouseUp);
+    dragState.current = {
+      item: itemEl,
+      placeholder,
+      shiftX: event.clientX - rect.left,
+      shiftY: event.clientY - rect.top,
+      mouseY: event.clientY,
+    };
 
-      scrollRafRef.current = requestAnimationFrame(scrollLoop);
-    },
-    [onMouseMove, onMouseUp, scrollLoop]
-  );
+    document.addEventListener("mousemove", onMouseMove);
+    document.addEventListener("mouseup", onMouseUp);
+    scrollRafRef.current = requestAnimationFrame(scrollLoop);
+  }, [canDrag, onMouseMove, onMouseUp, scrollLoop]);
 
-  const taskSource = sourceTasks ?? tasks;
-  let displayedTasks = tasks;
-
-  if (!preserveOrder && sorting === 'customer') {
-    displayedTasks = tasks.slice().reverse();
-  }
-  else if (!preserveOrder && sorting === 'A-Z') {
-    displayedTasks = tasks.slice().sort((a, b) => a.text.localeCompare(b.text));
-  }
-  else if (!preserveOrder && sorting === 'Z-A') {
-    displayedTasks = tasks.slice().sort((a, b) => b.text.localeCompare(a.text));
-  }
-  else if (!preserveOrder && (sorting === "date" || sorting === "date-reverse")) {
-    displayedTasks = tasks.slice().sort((a, b) => {
-      return sorting === "date"
-        ? a.createdAt - b.createdAt
-        : b.createdAt - a.createdAt;
-    });
-  }
-
-  return (
-    <>
-      <div ref={listRef} className="todo-list">
-        {displayedTasks.map((task) => (
-          <LineTasks
-            task={task}
-            key={task.id}
-            tasks={taskSource}
-            setTasks={setTasks}
-            setNumberMessages={setNumberMessages}
-            message={message}
-            onDragHandleMouseDown={handleDragHandleMouseDown}
-            onDetailsClick={(event) => onDetailsClick(task, event)}
-            storing={sorting}
-            search={search}
-          />
-        ))}
-      </div>
-      {tasks.length === 0 && <p className="no-tasks">No Tasks</p>}
-    </>
-  );
+  return { listRef, handleDragHandleMouseDown };
 };
-
-export default ListTasks;

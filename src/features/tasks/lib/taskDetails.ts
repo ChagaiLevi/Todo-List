@@ -1,4 +1,4 @@
-import { type SavedTaskProps } from "./types.ts";
+import { type SavedTask } from "../types";
 
 export const createTaskDetails = (date = new Date()) => ({
   createdAt: date.getTime(),
@@ -22,7 +22,7 @@ const parseLegacyTaskDate = (detailsDate?: string, detailsTime?: string) => {
   return Number.isNaN(parsedDate.getTime()) ? null : parsedDate;
 };
 
-export const getSavedTaskDate = (task: SavedTaskProps) => {
+export const getSavedTaskDate = (task: SavedTask) => {
   if (typeof task.createdAt === "number" && Number.isFinite(task.createdAt)) {
     return new Date(task.createdAt);
   }
@@ -40,19 +40,4 @@ export const getSavedTaskDate = (task: SavedTaskProps) => {
   }
 
   return parseLegacyTaskDate(task.detailsDate, task.detailsTime) ?? new Date();
-};
-
-export const normalizeTaskText = (value: unknown): string => {
-  if (typeof value === "string") return value;
-  if (typeof value === "number") return String(value);
-  if (Array.isArray(value)) return value.map(normalizeTaskText).join("");
-
-  if (value && typeof value === "object") {
-    const maybeElement = value as { props?: { children?: unknown } };
-    if ("props" in maybeElement) {
-      return normalizeTaskText(maybeElement.props?.children);
-    }
-  }
-
-  return "";
 };

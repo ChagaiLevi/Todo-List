@@ -1,0 +1,91 @@
+/* App-wide layout and shared animations. */
+body {
+  background: #000000;
+  min-height: 100vh;
+  font-family: "Orbitron", sans-serif;
+  color: #00e7ff;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.container {
+  background: rgba(5, 5, 5, 0.95);
+  backdrop-filter: blur(20px);
+  padding: 2rem;
+  width: 100%;
+  min-height: 100vh;
+  box-sizing: border-box;
+  border: none;
+  box-shadow: none;
+  animation: fadeIn 1s ease-out forwards;
+}
+
+h1 {
+  font-size: 3rem;
+  text-align: center;
+  margin: 1rem 0 2rem;
+  color: #00e7ff;
+  text-shadow: 0 0 25px rgba(0, 231, 255, 0.9), 0 0 40px rgba(0, 231, 255, 0.6);
+  letter-spacing: 3px;
+  overflow: hidden;
+  white-space: nowrap;
+  animation: typing 2s steps(20, end) forwards, glow 2s ease-in-out infinite alternate;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes typing {
+  from {
+    width: 0;
+  }
+
+  to {
+    width: 100%;
+  }
+}
+
+@keyframes glow {
+  from {
+    text-shadow: 0 0 15px rgba(0, 231, 255, 0.7), 0 0 25px rgba(0, 231, 255, 0.4);
+  }
+
+  to {
+    text-shadow: 0 0 25px rgba(0, 231, 255, 0.9), 0 0 40px rgba(0, 231, 255, 0.6);
+  }
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 15px rgba(0, 231, 255, 0.7), 0 0 25px rgba(0, 231, 255, 0.4);
+  }
+
+  50% {
+    box-shadow: 0 0 20px rgba(0, 231, 255, 0.9), 0 0 35px rgba(0, 231, 255, 0.6);
+  }
+
+  100% {
+    box-shadow: 0 0 15px rgba(0, 231, 255, 0.7), 0 0 25px rgba(0, 231, 255, 0.4);
+  }
+}
