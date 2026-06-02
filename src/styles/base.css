@@ -1,4 +1,14 @@
 /* App-wide layout and shared animations. */
+html {
+  scroll-behavior: smooth;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
 body {
   background: #000000;
   min-height: 100vh;
@@ -8,6 +18,20 @@ body {
   padding: 0;
   display: flex;
   flex-direction: column;
+  overflow-x: hidden;
+}
+
+button,
+input,
+select {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: 2px solid rgba(0, 231, 255, 0.85);
+  outline-offset: 3px;
 }
 
 .container {
@@ -87,5 +111,20 @@ h1 {
 
   100% {
     box-shadow: 0 0 15px rgba(0, 231, 255, 0.7), 0 0 25px rgba(0, 231, 255, 0.4);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
   }
 }

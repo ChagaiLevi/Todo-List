@@ -2,7 +2,9 @@ import {
   type Dispatch,
   type MouseEvent as ReactMouseEvent,
   type SetStateAction,
+  useCallback,
 } from "react";
+import { useAutoAnimate } from "@formkit/auto-animate/react";
 import TaskItem from "./TaskItem";
 import { useTaskDrag } from "../hooks/useTaskDrag";
 import { type ShowUndoableToast, type Task, type ToastMessage } from "../types";
@@ -29,10 +31,19 @@ const TaskList = ({
   onDetailsClick,
 }: TaskListProps) => {
   const { listRef, handleDragHandleMouseDown } = useTaskDrag(canDrag, setTasks);
+  const [animatedListRef] = useAutoAnimate<HTMLDivElement>({
+    duration: 260,
+    easing: "cubic-bezier(0.22, 1, 0.36, 1)",
+  });
+
+  const setListRefs = useCallback((element: HTMLDivElement | null) => {
+    listRef.current = element;
+    animatedListRef(element);
+  }, [animatedListRef, listRef]);
 
   return (
     <>
-      <div ref={listRef} className="todo-list">
+      <div ref={setListRefs} className="todo-list">
         {tasks.map((task) => (
           <TaskItem
             key={task.id}
@@ -48,7 +59,7 @@ const TaskList = ({
           />
         ))}
       </div>
-      {tasks.length === 0 && <p className="no-tasks">No Tasks</p>}
+      {tasks.length === 0 && <p className="no-tasks">No Tasks {search && 'with this search'}</p>}
     </>
   );
 };
